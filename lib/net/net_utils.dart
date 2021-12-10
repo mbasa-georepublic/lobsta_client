@@ -136,4 +136,35 @@ class NetworkHelper {
     }
     return retVal;
   }
+
+  static Future<Map<String, dynamic>> getIssue(
+      String mUrl, String apiKey, int issueId) async {
+    Map<String, dynamic> retVal = {};
+
+    String url = "$mUrl/issues/$issueId.json?include=attachments,journals";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Msg: ${response.statusMessage} Status Code: "
+            "${response.statusCode}");
+
+        retVal = response.data["issue"];
+      }
+    } on DioError catch (exception) {
+      debugPrint("User Projects Error: ${exception.message}");
+    }
+    return retVal;
+  }
 }

@@ -91,11 +91,8 @@ class ProjectPageState extends State<ProjectPage> {
                 "${issue["done_ratio"]}% completed"),
             isThreeLine: true,
             onTap: () {
-              /*debugPrint("Project ID: $_projectId,Issue ID: "
-                  "${issue["id"]}");*/
-              debugPrint(issue.toString());
               Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return IssueInfoPage(issue);
+                return IssueInfoPage(issue["id"]);
               }));
             },
           );
@@ -152,13 +149,13 @@ class ProjectPageState extends State<ProjectPage> {
                     _isLoaded = false;
                     initScreen();
                   })),
-          ElevatedButton(
+          IconButton(
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return ProjectInfoPage(_projectTitle, _projectId);
                 }));
               },
-              child: const Icon(Icons.info_outlined)),
+              icon: const Icon(Icons.info_outlined)),
           const SizedBox(
             width: 8.0,
           ),
