@@ -68,6 +68,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
           }
           noteJournals.add(Card(
             elevation: 2.5,
+            color: const Color.fromRGBO(238, 238, 232, 1),
             child: ListTile(
               isThreeLine: false,
               title: Text(j["notes"].toString()),

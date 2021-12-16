@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/pages/issue_entry_page.dart';
 import 'package:lobsta_client/pages/issue_info_page.dart';
 import 'package:lobsta_client/pages/project_info_page.dart';
 
@@ -169,7 +170,22 @@ class ProjectPageState extends State<ProjectPage> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          var ret = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return IssueEntryPage(_projectId);
+              },
+            ),
+          );
+          if (ret != null) {
+            setState(() {
+              _isLoaded = false;
+              initScreen();
+            });
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );
