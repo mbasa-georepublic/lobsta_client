@@ -84,7 +84,10 @@ class MainPageState extends State<MainPage> {
   buildMainWidget() async {
     switch (_bottomBarSel) {
       case 0:
-        _mainWidget = Container();
+        _mainWidget = Container(
+          alignment: Alignment.center,
+          child: const Text("No Tasks Assigned To Me"),
+        );
         break;
       case 1:
         List<Widget> arr = await buildProjects();
@@ -123,6 +126,7 @@ class MainPageState extends State<MainPage> {
           //leading: const Icon(Icons.eleven_mp),
           //primary: false,
           actions: [
+            /*
             const Icon(Icons.favorite),
             const SizedBox(
               width: 8.0,
@@ -134,7 +138,7 @@ class MainPageState extends State<MainPage> {
             const Icon(Icons.filter_alt),
             const SizedBox(
               width: 8.0,
-            ),
+            ),*/
             PopupMenuButton<int>(
               itemBuilder: (context) => [
                 const PopupMenuItem(

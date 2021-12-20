@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/img_view_page.dart';
+import 'package:lobsta_client/pages/issue_edit_page.dart';
 
 class IssueInfoPage extends StatefulWidget {
   final int _issueId;
@@ -122,6 +123,27 @@ class IssueInfoPageState extends State<IssueInfoPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Issue #$_issueId"),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                if (_issue.isNotEmpty) {
+                  var s = await Navigator.push(context, MaterialPageRoute(
+                    builder: (context) {
+                      return IssueEditPage(_issue);
+                    },
+                  ));
+
+                  if (s != null) {
+                    setState(() {
+                      _issue = {};
+                      getIssue();
+                    });
+                  }
+                }
+              },
+              icon: const Icon(Icons.edit_outlined),
+            ),
+          ],
         ),
         body: _issue.isEmpty
             ? waiting
@@ -225,7 +247,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                           Container(
                             padding: const EdgeInsets.all(7),
                             child: const Text(
-                              "Percent Completed",
+                              "Done Ratio",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),

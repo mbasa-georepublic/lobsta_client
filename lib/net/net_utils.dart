@@ -102,6 +102,39 @@ class NetworkHelper {
     return retVal;
   }
 
+  static Future<List<Map<String, dynamic>>> getIssueStatus(
+      String mUrl, String apiKey) async {
+    List<Map<String, dynamic>> retVal = [];
+
+    String url = "$mUrl/issue_statuses.json";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("IssueStatus Msg: ${response.statusMessage}");
+
+        //retVal = response.data["projects"] as List<Map<String, dynamic>>;
+        for (Map<String, dynamic> ret in response.data["issue_statuses"]) {
+          retVal.add(ret);
+        }
+      }
+    } on DioError catch (exception) {
+      debugPrint("IssueStatus Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
   static Future<List<Map<String, dynamic>>> getTrackers(
       String mUrl, String apiKey) async {
     List<Map<String, dynamic>> retVal = [];
@@ -242,8 +275,8 @@ class NetworkHelper {
         ? "$url/issues.json"
         : "$url/issues/${params["issue"]["issue_id"]}.json";
 
-    //debugPrint("POST: $iUrl");
-    //debugPrint("Params: ${params.toString()}");
+    debugPrint("POST: $iUrl");
+    debugPrint("Params: ${params.toString()}");
 
     try {
       Dio dio = Dio();
@@ -278,11 +311,10 @@ class NetworkHelper {
         "status_message": response.statusMessage,
         "status_data": response.data,
       };
-      /*
+
       debugPrint("Status Code: ${response.statusCode}, "
           "Status Message: ${response.statusMessage},"
           "Status Data: ${response.data.toString()}");
-       */
     } catch (exception) {
       debugPrint("Issue Error: $exception");
     }
