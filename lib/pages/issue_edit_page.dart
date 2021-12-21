@@ -55,7 +55,7 @@ class IssueEditPageState extends State<IssueEditPage> {
     _assignedTo = _issue["assigned_to"]?["id"] ?? 0;
     _issueStatusId = _issue["status"]?["id"] ?? 0;
 
-    debugPrint("Issue: ${_issue.toString()}");
+    //debugPrint("Issue: ${_issue.toString()}");
 
     _isPrivate = _issue["is_private"] ?? false;
     _trackerId = _issue["tracker"]["id"] ?? 0;
@@ -191,6 +191,8 @@ class IssueEditPageState extends State<IssueEditPage> {
       issueParams["due_date"] = _dueDate;
     }
 
+    DialogUtil.showOnSendDialog(context, "Submitting Issue");
+
     if (_useLocation) {
       try {
         Location location = Location();
@@ -207,7 +209,6 @@ class IssueEditPageState extends State<IssueEditPage> {
 
     Map<String, dynamic> issue = {"issue": issueParams};
 
-    DialogUtil.showOnSendDialog(context, "Submitting Issue");
     var r = await NetworkHelper.postIssue(_mUrl, _apiKey, issue);
     Navigator.pop(context);
 
@@ -230,7 +231,7 @@ class IssueEditPageState extends State<IssueEditPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Issue #${_issue["id"]}"),
+        title: Text("Update Issue #${_issue["id"]}"),
       ),
       body: !_isLoaded
           ? waiting

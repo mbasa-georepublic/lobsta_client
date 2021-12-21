@@ -3,6 +3,7 @@ import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/img_view_page.dart';
 import 'package:lobsta_client/pages/issue_edit_page.dart';
+import 'package:lobsta_client/utils/dialog_utils.dart';
 
 class IssueInfoPage extends StatefulWidget {
   final int _issueId;
@@ -15,6 +16,10 @@ class IssueInfoPage extends StatefulWidget {
 class IssueInfoPageState extends State<IssueInfoPage> {
   Map<String, dynamic> _issue = {};
   Map<String, Object?> _userCred = {};
+
+  String _url = "";
+  String _apiToken = "";
+
   int _issueId = -1;
 
   final DatabaseHelper _dbh = DatabaseHelper();
@@ -30,12 +35,12 @@ class IssueInfoPageState extends State<IssueInfoPage> {
   getIssue() async {
     if (_userCred.isEmpty) {
       _userCred = await _dbh.getUserCredential();
+
+      _url = _userCred["url"].toString();
+      _apiToken = _userCred["redmine_token"].toString();
     }
 
-    String url = _userCred["url"].toString();
-    String apiToken = _userCred["redmine_token"].toString();
-
-    _issue = await NetworkHelper.getIssue(url, apiToken, _issueId);
+    _issue = await NetworkHelper.getIssue(_url, _apiToken, _issueId);
 
     setState(() {});
   }
@@ -123,6 +128,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Issue #$_issueId"),
+          centerTitle: true,
           actions: [
             IconButton(
               onPressed: () async {
@@ -142,6 +148,29 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                 }
               },
               icon: const Icon(Icons.edit_outlined),
+            ),
+            IconButton(
+              onPressed: () async {
+                bool del = await DialogUtil.showConfirmDialog(context, "Delete",
+                    "Delete Issue #$_issueId?", "Cancel", "Delete");
+
+                if (del) {
+                  DialogUtil.showOnSendDialog(context, "Deleting Issue");
+
+                  bool ret = await NetworkHelper.deleteIssue(
+                      _url, _apiToken, _issueId);
+                  debugPrint("Delete: ${ret.toString()}");
+
+                  if (ret) {
+                    Navigator.pop(context);
+                    Navigator.pop(context, true);
+                  } else {
+                    DialogUtil.showCustomDialog(
+                        context, "Error", "An Error Occurred", "Close");
+                  }
+                }
+              },
+              icon: const Icon(Icons.delete),
             ),
           ],
         ),

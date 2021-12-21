@@ -236,6 +236,39 @@ class NetworkHelper {
     return retVal;
   }
 
+  static Future<List<Map<String, dynamic>>> getMyTasks(
+      String mUrl, String apiKey) async {
+    List<Map<String, dynamic>> retVal = [];
+
+    String url = "$mUrl/issues.json?assigned_to_id=me";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Msg: ${response.statusMessage} Status Code: "
+            "${response.statusCode}");
+
+        for (Map<String, dynamic> ret in response.data["issues"]) {
+          retVal.add(ret);
+        }
+      }
+    } on DioError catch (exception) {
+      debugPrint("My Tasks Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
   static Future<Map<String, dynamic>> getIssue(
       String mUrl, String apiKey, int issueId) async {
     Map<String, dynamic> retVal = {};
@@ -263,6 +296,32 @@ class NetworkHelper {
       }
     } on DioError catch (exception) {
       debugPrint("User Projects Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
+  static Future<bool> deleteIssue(
+      String mUrl, String apiKey, int issueId) async {
+    bool retVal = false;
+
+    String url = "$mUrl/issues/$issueId.json";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.delete(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      retVal = true;
+    } on DioError catch (exception) {
+      debugPrint("Delete Error: ${exception.message}");
     }
     return retVal;
   }

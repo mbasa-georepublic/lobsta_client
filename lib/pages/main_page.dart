@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/pages/issue_info_page.dart';
 import 'package:lobsta_client/pages/login_page.dart';
 import 'package:lobsta_client/pages/project_page.dart';
 
@@ -13,7 +14,7 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   bool _isLoaded = false;
-  int _bottomBarSel = 1;
+  int _bottomBarSel = 0;
   Map<String, Object?> _userCred = {};
   Widget _mainWidget = Container();
 
@@ -46,6 +47,45 @@ class MainPageState extends State<MainPage> {
         ), (route) => false);
         break;
     }
+  }
+
+  Future<List<Widget>> buildMyTasks() async {
+    List<Widget> retVal = [];
+
+    String url = _userCred["url"].toString();
+    String apiToken = _userCred["redmine_token"].toString();
+
+    if (url.isNotEmpty && apiToken.isNotEmpty) {
+      List<Map<String, dynamic>> issues =
+          await NetworkHelper.getMyTasks(url, apiToken);
+
+      if (issues.isNotEmpty) {
+        for (var p in issues) {
+          int id = p["id"];
+          String subject = p["subject"].toString();
+          String desc = p["project"]?["name"];
+
+          retVal.add(
+            ListTile(
+              title: Text(subject),
+              subtitle: Text(desc),
+              isThreeLine: false,
+              leading: const Icon(Icons.list_alt),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return IssueInfoPage(id);
+                  }),
+                );
+                await redraw();
+              },
+            ),
+          );
+        }
+      }
+    }
+    return retVal;
   }
 
   Future<List<Widget>> buildProjects() async {
@@ -84,10 +124,21 @@ class MainPageState extends State<MainPage> {
   buildMainWidget() async {
     switch (_bottomBarSel) {
       case 0:
-        _mainWidget = Container(
-          alignment: Alignment.center,
-          child: const Text("No Tasks Assigned To Me"),
-        );
+        List<Widget> arr = await buildMyTasks();
+        if (arr.isEmpty) {
+          _mainWidget = Container(
+            alignment: Alignment.center,
+            child: const Text("No Tasks Assigned To Me"),
+          );
+        } else {
+          _mainWidget = SingleChildScrollView(
+            child: Column(
+              children: arr,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          );
+        }
         break;
       case 1:
         List<Widget> arr = await buildProjects();
@@ -106,6 +157,16 @@ class MainPageState extends State<MainPage> {
         _mainWidget = Container();
         break;
     }
+  }
+
+  redraw() async {
+    _isLoaded = false;
+    setState(() {});
+
+    await buildMainWidget();
+
+    _isLoaded = true;
+    setState(() {});
   }
 
   @override
@@ -179,16 +240,7 @@ class MainPageState extends State<MainPage> {
           ],
           onTap: (i) async {
             _bottomBarSel = i;
-/*
-            DialogUtil.showOnSendDialog(context, "Processing");
-            await buildMainWidget();
-            Navigator.pop(context);
-*/
-            _isLoaded = false;
-            setState(() {});
-            await buildMainWidget();
-            _isLoaded = true;
-            setState(() {});
+            await redraw();
           },
         ),
       ),

@@ -91,10 +91,22 @@ class ProjectPageState extends State<ProjectPage> {
             subtitle: Text("${issue["tracker"]["name"]}  "
                 "${issue["done_ratio"]}% completed"),
             isThreeLine: true,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                return IssueInfoPage(issue["id"]);
-              }));
+            onTap: () async {
+              var ret = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return IssueInfoPage(issue["id"]);
+                  },
+                ),
+              );
+
+              if (ret != null) {
+                setState(() {
+                  _isLoaded = false;
+                  initScreen();
+                });
+              }
             },
           );
 

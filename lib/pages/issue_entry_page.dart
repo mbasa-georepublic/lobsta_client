@@ -129,6 +129,8 @@ class IssueEntryPageState extends State<IssueEntryPage> {
       issueParams["assigned_to_id"] = _userId;
     }
 
+    DialogUtil.showOnSendDialog(context, "Submitting Issue");
+
     if (_useLocation) {
       try {
         Location location = Location();
@@ -145,7 +147,6 @@ class IssueEntryPageState extends State<IssueEntryPage> {
 
     Map<String, dynamic> issue = {"issue": issueParams};
 
-    DialogUtil.showOnSendDialog(context, "Submitting Issue");
     var r = await NetworkHelper.postIssue(_mUrl, _apiKey, issue);
 
     Navigator.pop(context);
