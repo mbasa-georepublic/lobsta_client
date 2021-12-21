@@ -182,8 +182,8 @@ class MainPageState extends State<MainPage> {
       body: Scaffold(
         body: !_isLoaded ? waiting : _mainWidget,
         appBar: AppBar(
-          //centerTitle: true,
-          title: const Text("Easy Redmine Copy"),
+          centerTitle: true,
+          title: const Text("LOBSTA Client"),
           //leading: const Icon(Icons.eleven_mp),
           //primary: false,
           actions: [

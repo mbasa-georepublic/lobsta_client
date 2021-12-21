@@ -26,7 +26,7 @@ class LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: const Text("Easy Redmine Copy"),
+        title: const Text("LOBSTA Client"),
       ),
       body: SafeArea(
         child: Padding(
@@ -110,8 +110,7 @@ class LoginPageState extends State<LoginPage> {
                     validator: (v) {
                       if (v == null || v.isEmpty) {
                         return "Field can not be empty";
-                      }
-                      else if (!Uri.parse(v).isAbsolute) {
+                      } else if (!Uri.parse(v).isAbsolute) {
                         return "Not a valid URL Address";
                       }
                       _url = v;
@@ -128,43 +127,58 @@ class LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                const SizedBox(
+                  height: 35,
+                ),
+                SizedBox(
+                  width: 160,
+                  height: 40,
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  side: const BorderSide(color: Colors.red)))),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          DialogUtil.showOnSendDialog(
+                              context, "Sending Login Information");
+
+                          String apiToken = await NetworkHelper.getApiKey(
+                              _user, _password, _url);
+
+                          Navigator.pop(context);
+
+                          if (apiToken.isNotEmpty) {
+                            debugPrint("Registered: $apiToken");
+
+                            _dbh.insertUserCredential(
+                                _user, _password, _url, apiToken);
+
+                            Navigator.pushAndRemoveUntil(context,
+                                MaterialPageRoute(
+                              builder: (context) {
+                                return const MainPage();
+                              },
+                            ), (route) => false);
+                          } else {
+                            DialogUtil.showCustomDialog(
+                                context,
+                                "Error",
+                                "An Error has Occurred. \nCheck entered parameters.",
+                                "Close");
+                          }
+                        }
+                      },
+                      child: const Text("Send")),
+                ),
               ],
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            DialogUtil.showOnSendDialog(context, "Sending Login Information");
-
-            String apiToken =
-                await NetworkHelper.getApiKey(_user, _password, _url);
-
-            Navigator.pop(context);
-
-            if (apiToken.isNotEmpty) {
-              debugPrint("Registered: $apiToken");
-
-              _dbh.insertUserCredential(_user, _password, _url, apiToken);
-
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-                builder: (context) {
-                  return const MainPage();
-                },
-              ), (route) => false);
-            } else {
-              DialogUtil.showCustomDialog(
-                  context,
-                  "Error",
-                  "An Error has Occurred. \nCheck entered parameters.",
-                  "Close");
-            }
-          }
-        },
-        tooltip: 'Login',
-        child: const Icon(Icons.send),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

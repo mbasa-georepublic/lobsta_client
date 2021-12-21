@@ -309,7 +309,7 @@ class NetworkHelper {
     try {
       Dio dio = Dio();
 
-      Response response = await dio.delete(
+      await dio.delete(
         url,
         options: Options(
           headers: {

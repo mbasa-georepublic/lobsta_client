@@ -31,8 +31,8 @@ class IssueEditPageState extends State<IssueEditPage> {
   final List<DropdownMenuItem<int>> _issueStatus = [];
 
   bool _isLoaded = false;
-  bool _isPrivate = true;
-  bool _isPriority = false;
+  //bool _isPrivate = true;
+  //bool _isPriority = false;
   bool _useLocation = false;
 
   int _assignedTo = 0;
@@ -54,10 +54,7 @@ class IssueEditPageState extends State<IssueEditPage> {
     _dueDate = _issue["due_date"] ?? "--";
     _assignedTo = _issue["assigned_to"]?["id"] ?? 0;
     _issueStatusId = _issue["status"]?["id"] ?? 0;
-
-    //debugPrint("Issue: ${_issue.toString()}");
-
-    _isPrivate = _issue["is_private"] ?? false;
+    //_isPrivate = _issue["is_private"] ?? false;
     _trackerId = _issue["tracker"]["id"] ?? 0;
     _doneRatioId = _issue["done_ratio"] ?? 0;
 
