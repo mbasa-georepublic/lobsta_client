@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -322,6 +323,37 @@ class NetworkHelper {
       retVal = true;
     } on DioError catch (exception) {
       debugPrint("Delete Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
+  static Future<Map<String, dynamic>> postImage(Uint8List imageBytes,
+      String imageName, String mUrl, String apiKey) async {
+    Map<String, dynamic> retVal = {};
+
+    String url = "$mUrl/uploads.json?filename=$imageName";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.post(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/octet-stream",
+          },
+        ),
+        data: Stream.fromIterable(imageBytes.map((e) => [e])),
+      );
+
+      retVal = {
+        "status_code": response.statusCode,
+        "status_message": response.statusMessage,
+        "status_data": response.data,
+      };
+    } catch (exception) {
+      debugPrint("Image Error: $exception");
     }
     return retVal;
   }

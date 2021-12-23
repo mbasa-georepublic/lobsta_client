@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
+import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
 
 class IssueEditPage extends StatefulWidget {
@@ -22,6 +26,7 @@ class IssueEditPageState extends State<IssueEditPage> {
   String _subject = "";
   String _description = "";
   String _newNote = "";
+  String _imageFile = "";
   String _startDate = DateTime.now().toIso8601String().split("T")[0];
   String _dueDate = DateTime.now().toIso8601String().split("T")[0];
 
@@ -113,6 +118,7 @@ class IssueEditPageState extends State<IssueEditPage> {
     ));
 
     if (members.isNotEmpty) {
+      bool found = false;
       for (Map<String, dynamic> u in members) {
         if (u["user"] == null) {
           continue;
@@ -121,6 +127,13 @@ class IssueEditPageState extends State<IssueEditPage> {
           child: Text("${u["user"]["name"]}"),
           value: u["user"]["id"],
         ));
+
+        if (_assignedTo == u["user"]["id"]) {
+          found = true;
+        }
+      }
+      if (!found) {
+        _assignedTo = 0;
       }
     } else {
       _assignedTo = 0;
@@ -190,6 +203,9 @@ class IssueEditPageState extends State<IssueEditPage> {
 
     DialogUtil.showOnSendDialog(context, "Submitting Issue");
 
+    ///***
+    ///* Setting Location
+    ///***
     if (_useLocation) {
       try {
         Location location = Location();
@@ -201,6 +217,19 @@ class IssueEditPageState extends State<IssueEditPage> {
             "[${l.longitude},${l.latitude}]}}";
       } catch (e) {
         debugPrint("Location Error: ${e.toString()}");
+      }
+    }
+
+    ///***
+    ///* Uploading and setting image
+    ///***
+    if (_imageFile.isNotEmpty) {
+      Map<String, dynamic> upload =
+          await IssueUtils.uploadImageFile(_imageFile, _mUrl, _apiKey);
+
+      if (upload.isNotEmpty) {
+        List<Map<String, dynamic>> uploads = [upload];
+        issueParams["uploads"] = uploads;
       }
     }
 
@@ -352,7 +381,7 @@ class IssueEditPageState extends State<IssueEditPage> {
                     ),
                     ListTile(
                       leading: const SizedBox(
-                        width: 110,
+                        width: 70,
                       ),
                       title: CheckboxListTile(
                         controlAffinity: ListTileControlAffinity.leading,
@@ -366,6 +395,62 @@ class IssueEditPageState extends State<IssueEditPage> {
                           "Update Location Information\nTo Present Position",
                           style: TextStyle(fontSize: 15),
                         ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              String? s =
+                                  await CameraUtils.loadImageFromGallery();
+                              if (s != null) {
+                                setState(() {
+                                  _imageFile = s;
+                                });
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(Colors.grey),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  side: const BorderSide(color: Colors.white10),
+                                ),
+                              ),
+                            ),
+                            child: const Text("Add Photo"),
+                          ),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          Container(
+                            height: 120,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              //color: Colors.grey,
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: _imageFile.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                      "Image",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                : Image.file(
+                                    File(_imageFile),
+                                  ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(

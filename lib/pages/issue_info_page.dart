@@ -184,7 +184,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                     Table(
                       columnWidths: const {
                         0: FlexColumnWidth(1),
-                        1: FlexColumnWidth(2),
+                        1: FlexColumnWidth(3),
                       },
                       border: TableBorder.all(color: Colors.grey),
                       children: [

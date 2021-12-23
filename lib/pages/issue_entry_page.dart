@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
+import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
 
 class IssueEntryPage extends StatefulWidget {
@@ -32,6 +36,7 @@ class IssueEntryPageState extends State<IssueEntryPage> {
   String _apiKey = "";
   String _subject = "";
   String _description = "";
+  String _imageFile = "";
   String _startDate = DateTime.now().toIso8601String().split("T")[0];
   String _dueDate = DateTime.now().toIso8601String().split("T")[0];
 
@@ -131,6 +136,9 @@ class IssueEntryPageState extends State<IssueEntryPage> {
 
     DialogUtil.showOnSendDialog(context, "Submitting Issue");
 
+    ///***
+    ///* Setting Location
+    ///***
     if (_useLocation) {
       try {
         Location location = Location();
@@ -142,6 +150,19 @@ class IssueEntryPageState extends State<IssueEntryPage> {
             "[${l.longitude},${l.latitude}]}}";
       } catch (e) {
         debugPrint("Location Error: ${e.toString()}");
+      }
+    }
+
+    ///***
+    ///* Uploading and setting image
+    ///***
+    if (_imageFile.isNotEmpty) {
+      Map<String, dynamic> upload =
+          await IssueUtils.uploadImageFile(_imageFile, _mUrl, _apiKey);
+
+      if (upload.isNotEmpty) {
+        List<Map<String, dynamic>> uploads = [upload];
+        issueParams["uploads"] = uploads;
       }
     }
 
@@ -169,173 +190,230 @@ class IssueEntryPageState extends State<IssueEntryPage> {
     );
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("New Issue"),
-          centerTitle: true,
-        ),
-        body: !_isLoaded
-            ? waiting
-            : SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(10, 30, 10, 20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("Subject"),
-                        ),
-                        title: TextFormField(
-                          keyboardType: TextInputType.text,
-                          obscureText: false,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return "Field can not be empty";
-                            }
-                            _subject = v;
-                            return null;
-                          },
+      appBar: AppBar(
+        title: const Text("New Issue"),
+        centerTitle: true,
+      ),
+      body: !_isLoaded
+          ? waiting
+          : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Subject"),
+                      ),
+                      title: TextFormField(
+                        keyboardType: TextInputType.text,
+                        obscureText: false,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return "Field can not be empty";
+                          }
+                          _subject = v;
+                          return null;
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Description"),
+                      ),
+                      title: TextFormField(
+                        maxLines: 2,
+                        keyboardType: TextInputType.text,
+                        obscureText: false,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return "Field can not be empty";
+                          }
+                          _description = v;
+                          return null;
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Assigned To"),
+                      ),
+                      title: DropdownButtonFormField(
+                        items: _users,
+                        value: _userId,
+                        onChanged: (i) {
+                          _userId = i as int;
+                          debugPrint("User: $_userId");
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Tracker"),
+                      ),
+                      title: DropdownButtonFormField(
+                        items: _trackers,
+                        value: _trackerId,
+                        onChanged: (i) {
+                          _trackerId = i as int;
+                          debugPrint("Tracker: $_trackerId");
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("StartDate"),
+                      ),
+                      title: OutlinedButton(
+                        onPressed: () => _selectDate(context),
+                        child: Text(_startDate),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("DueDate"),
+                      ),
+                      title: OutlinedButton(
+                        onPressed: () =>
+                            _selectDate(context, isStartDate: false),
+                        child: Text(_dueDate),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
+                      title: CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: _isPriority,
+                        onChanged: (v) {
+                          _isPriority = v!;
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Priority",
+                          style: TextStyle(fontSize: 15),
                         ),
                       ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("Description"),
-                        ),
-                        title: TextFormField(
-                          maxLines: 2,
-                          keyboardType: TextInputType.text,
-                          obscureText: false,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return "Field can not be empty";
-                            }
-                            _description = v;
-                            return null;
-                          },
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
+                      title: CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: _isPrivate,
+                        onChanged: (v) {
+                          _isPrivate = v!;
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Private",
+                          style: TextStyle(fontSize: 15),
                         ),
                       ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("Assigned To"),
-                        ),
-                        title: DropdownButtonFormField(
-                          items: _users,
-                          value: _userId,
-                          onChanged: (i) {
-                            _userId = i as int;
-                            debugPrint("User: $_userId");
-                          },
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
+                      title: CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: _useLocation,
+                        onChanged: (v) {
+                          _useLocation = v!;
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Use Present Location",
+                          style: TextStyle(fontSize: 15),
                         ),
                       ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("Tracker"),
-                        ),
-                        title: DropdownButtonFormField(
-                          items: _trackers,
-                          value: _trackerId,
-                          onChanged: (i) {
-                            _trackerId = i as int;
-                            debugPrint("Tracker: $_trackerId");
-                          },
-                        ),
-                      ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("StartDate"),
-                        ),
-                        title: OutlinedButton(
-                          onPressed: () => _selectDate(context),
-                          child: Text(_startDate),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                          child: Text("DueDate"),
-                        ),
-                        title: OutlinedButton(
-                          onPressed: () =>
-                              _selectDate(context, isStartDate: false),
-                          child: Text(_dueDate),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                        ),
-                        title: CheckboxListTile(
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                          value: _isPrivate,
-                          onChanged: (v) {
-                            _isPrivate = v!;
-                            setState(() {});
-                          },
-                          title: const Text(
-                            "Private",
-                            style: TextStyle(fontSize: 15),
+                    ),
+                    const SizedBox(
+                      height: 15.0,
+                    ),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              String? s =
+                                  await CameraUtils.loadImageFromGallery();
+                              if (s != null) {
+                                setState(() {
+                                  _imageFile = s;
+                                });
+                              }
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(Colors.grey),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  side: const BorderSide(color: Colors.white10),
+                                ),
+                              ),
+                            ),
+                            child: const Text("Add Photo"),
                           ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                        ),
-                        title: CheckboxListTile(
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                          value: _isPriority,
-                          onChanged: (v) {
-                            _isPriority = v!;
-                            setState(() {});
-                          },
-                          title: const Text(
-                            "Priority",
-                            style: TextStyle(fontSize: 15),
+                          const SizedBox(
+                            width: 15,
                           ),
-                        ),
-                      ),
-                      ListTile(
-                        leading: const SizedBox(
-                          width: 110,
-                        ),
-                        title: CheckboxListTile(
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                          value: _useLocation,
-                          onChanged: (v) {
-                            _useLocation = v!;
-                            setState(() {});
-                          },
-                          title: const Text(
-                            "Use Present Location",
-                            style: TextStyle(fontSize: 15),
+                          Container(
+                            height: 120,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              //color: Colors.grey,
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: _imageFile.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                      "Image",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                : Image.file(
+                                    File(_imageFile),
+                                  ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 30.0,
+                    ),
+                    const SizedBox(
+                      height: 30.0,
+                    ),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            await _submitIssue();
+                          }
+                        },
+                        child: const Text("Submit Issue"),
                       ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              await _submitIssue();
-                            }
-                          },
-                          child: const Text("Submit Issue"),
-                        ),
-                      )
-                    ],
-                  ),
+                    )
+                  ],
                 ),
-              ));
+              ),
+            ),
+    );
   }
 }
