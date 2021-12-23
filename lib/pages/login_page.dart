@@ -132,12 +132,14 @@ class LoginPageState extends State<LoginPage> {
                     height: 40,
                     child: ElevatedButton(
                         style: ButtonStyle(
-                            shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    side:
-                                        const BorderSide(color: Colors.red)))),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                              side: const BorderSide(color: Colors.red),
+                            ),
+                          ),
+                        ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             DialogUtil.showOnSendDialog(
