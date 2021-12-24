@@ -131,22 +131,24 @@ class MainPageState extends State<MainPage> {
             child: const Text("No Tasks Assigned To Me"),
           );
         } else {
-          _mainWidget = SingleChildScrollView(
-            child: Column(
+          _mainWidget = RefreshIndicator(
+            onRefresh: () async {
+              await redraw();
+            },
+            child: ListView(
               children: arr,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
             ),
           );
         }
         break;
       case 1:
         List<Widget> arr = await buildProjects();
-        _mainWidget = SingleChildScrollView(
-          child: Column(
+        _mainWidget = RefreshIndicator(
+          onRefresh: () async {
+            await redraw();
+          },
+          child: ListView(
             children: arr,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
           ),
         );
         break;

@@ -176,8 +176,13 @@ class ProjectPageState extends State<ProjectPage> {
       ),
       body: !_isLoaded
           ? waiting
-          : SingleChildScrollView(
-              child: Column(
+          : RefreshIndicator(
+              onRefresh: () async {
+                _isLoaded = false;
+                setState(() {});
+                initScreen();
+              },
+              child: ListView(
                 children: _issueList,
               ),
             ),
