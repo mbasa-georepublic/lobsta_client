@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/pages/issue_mapview_page.dart';
 import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
@@ -39,6 +41,8 @@ class IssueEntryPageState extends State<IssueEntryPage> {
   String _imageFile = "";
   String _startDate = DateTime.now().toIso8601String().split("T")[0];
   String _dueDate = DateTime.now().toIso8601String().split("T")[0];
+
+  LatLng _latLng = LatLng(0, 0);
 
   @override
   void initState() {
@@ -92,6 +96,14 @@ class IssueEntryPageState extends State<IssueEntryPage> {
       }
     }
 
+    try {
+      Location location = Location();
+      var l = await location.getLocation();
+      _latLng = LatLng(l.latitude!, l.longitude!);
+    } catch (e) {
+      debugPrint("Location Error: ${e.toString()}");
+    }
+
     setState(() {
       _isLoaded = true;
     });
@@ -140,17 +152,9 @@ class IssueEntryPageState extends State<IssueEntryPage> {
     ///* Setting Location
     ///***
     if (_useLocation) {
-      try {
-        Location location = Location();
-        var l = await location.getLocation();
-        debugPrint("Location: ${l.toString()}");
-
-        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
-            "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
-            "[${l.longitude},${l.latitude}]}}";
-      } catch (e) {
-        debugPrint("Location Error: ${e.toString()}");
-      }
+      issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+          "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
+          "[${_latLng.longitude},${_latLng.latitude}]}}";
     }
 
     ///***
@@ -248,7 +252,6 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         value: _userId,
                         onChanged: (i) {
                           _userId = i as int;
-                          debugPrint("User: $_userId");
                         },
                       ),
                     ),
@@ -262,7 +265,6 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         value: _trackerId,
                         onChanged: (i) {
                           _trackerId = i as int;
-                          debugPrint("Tracker: $_trackerId");
                         },
                       ),
                     ),
@@ -331,13 +333,41 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
                         value: _useLocation,
-                        onChanged: (v) {
+                        onChanged: (v) async {
                           _useLocation = v!;
                           setState(() {});
                         },
                         title: const Text(
-                          "Use Present Location",
+                          "Use Location",
                           style: TextStyle(fontSize: 15),
+                        ),
+                        subtitle: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
+                              onPressed: _useLocation
+                                  ? () async {
+                                      var l = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) {
+                                          return IssueMapViewPage(_latLng);
+                                        }),
+                                      );
+                                      if (l != null) {
+                                        debugPrint(
+                                            "Location from Map: ${l.toString()}");
+                                        _latLng = l;
+                                      }
+                                    }
+                                  : null,
+                              label: const Text("Open Map"),
+                              icon: const Icon(
+                                Icons.add_location_alt_outlined,
+                                size: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

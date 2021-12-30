@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/img_view_page.dart';
 import 'package:lobsta_client/pages/issue_edit_page.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
+
+import 'issue_mapview_page.dart';
 
 class IssueInfoPage extends StatefulWidget {
   final int _issueId;
@@ -19,8 +22,9 @@ class IssueInfoPageState extends State<IssueInfoPage> {
 
   String _url = "";
   String _apiToken = "";
-
   int _issueId = -1;
+
+  LatLng _latLng = LatLng(0, 0);
 
   final DatabaseHelper _dbh = DatabaseHelper();
 
@@ -42,6 +46,19 @@ class IssueInfoPageState extends State<IssueInfoPage> {
 
     _issue = await NetworkHelper.getIssue(_url, _apiToken, _issueId);
 
+    if (_issue["geojson"] != null && _issue["geojson"].toString().isNotEmpty) {
+      try {
+        Map<String, dynamic> geom = _issue["geojson"]["geometry"];
+
+        if (geom.isNotEmpty && geom["type"] == "Point") {
+          _latLng = LatLng(geom["coordinates"][1], geom["coordinates"][0]);
+          debugPrint("LatLng: ${_latLng.toString()}");
+        }
+      } catch (e) {
+        debugPrint("GeoJSON Error: ${e.toString()}");
+      }
+    }
+
     setState(() {});
   }
 
@@ -56,6 +73,46 @@ class IssueInfoPageState extends State<IssueInfoPage> {
 
     List<Widget> imgAttachments = [];
     List<Widget> noteJournals = [];
+    List<Widget> mapLocation = [];
+
+    if (_latLng.longitude != 0 && _latLng.latitude != 0) {
+      mapLocation.add(
+        const Text(
+          "Location",
+          style: TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+
+      mapLocation.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            TextButton.icon(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return IssueMapViewPage(
+                      _latLng,
+                      forEdit: false,
+                    );
+                  }),
+                );
+              },
+              label: const Text("Open Map"),
+              icon: const Icon(
+                Icons.add_location_alt_outlined,
+                size: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (_issue.isNotEmpty && _issue["journals"] != null) {
       bool isFirst = true;
@@ -73,7 +130,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
             ));
           }
           noteJournals.add(Card(
-            elevation: 2.5,
+            elevation: 1.5,
             color: const Color.fromRGBO(238, 238, 232, 1),
             child: ListTile(
               isThreeLine: false,
@@ -313,13 +370,21 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                         ]),
                       ],
                     ),
-                    const SizedBox(
-                      height: 16.0,
+                    SizedBox(
+                      height: imgAttachments.isEmpty ? 0.0 : 16.0,
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: imgAttachments,
+                    ),
+                    SizedBox(
+                      height: mapLocation.isEmpty ? 0.0 : 16.0,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: mapLocation,
                     ),
                     const SizedBox(
                       height: 16.0,

@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
+
+import 'issue_mapview_page.dart';
 
 class IssueEditPage extends StatefulWidget {
   final Map<String, dynamic> _issue;
@@ -46,6 +49,7 @@ class IssueEditPageState extends State<IssueEditPage> {
   int _doneRatioId = 0;
   int _issueStatusId = 0;
 
+  LatLng _latLng = LatLng(0, 0);
   Map<String, dynamic> _issue = {};
 
   @override
@@ -62,6 +66,26 @@ class IssueEditPageState extends State<IssueEditPage> {
     //_isPrivate = _issue["is_private"] ?? false;
     _trackerId = _issue["tracker"]["id"] ?? 0;
     _doneRatioId = _issue["done_ratio"] ?? 0;
+
+    if (_issue["geojson"] != null && _issue["geojson"].toString().isNotEmpty) {
+      try {
+        Map<String, dynamic> geom = _issue["geojson"]["geometry"];
+
+        if (geom.isNotEmpty && geom["type"] == "Point") {
+          _latLng = LatLng(geom["coordinates"][1], geom["coordinates"][0]);
+          debugPrint("LatLng: ${_latLng.toString()}");
+        }
+      } catch (e) {
+        debugPrint("GeoJSON Error: ${e.toString()}");
+      }
+    }
+
+    if (_doneRatioId > 0 && _doneRatioId % 10 != 0) {
+      _doneRatioId = _doneRatioId - (_doneRatioId % 10);
+    }
+    if (_doneRatioId > 100) {
+      _doneRatioId = 100;
+    }
 
     initScreen();
   }
@@ -139,6 +163,17 @@ class IssueEditPageState extends State<IssueEditPage> {
       _assignedTo = 0;
     }
 
+    if (_latLng.longitude == 0 && _latLng.latitude == 0) {
+      try {
+        Location location = Location();
+
+        var l = await location.getLocation();
+        _latLng = LatLng(l.latitude!, l.longitude!);
+      } catch (e) {
+        debugPrint("Location Error: ${e.toString()}");
+      }
+    }
+
     setState(() {
       _isLoaded = true;
     });
@@ -207,17 +242,9 @@ class IssueEditPageState extends State<IssueEditPage> {
     ///* Setting Location
     ///***
     if (_useLocation) {
-      try {
-        Location location = Location();
-        var l = await location.getLocation();
-        debugPrint("Location: ${l.toString()}");
-
-        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
-            "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
-            "[${l.longitude},${l.latitude}]}}";
-      } catch (e) {
-        debugPrint("Location Error: ${e.toString()}");
-      }
+      issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+          "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
+          "[${_latLng.longitude},${_latLng.latitude}]}}";
     }
 
     ///***
@@ -392,8 +419,36 @@ class IssueEditPageState extends State<IssueEditPage> {
                           setState(() {});
                         },
                         title: const Text(
-                          "Update Location Information\nTo Present Position",
+                          "Update Location Information",
                           style: TextStyle(fontSize: 15),
+                        ),
+                        subtitle: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
+                              onPressed: _useLocation
+                                  ? () async {
+                                      var l = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) {
+                                          return IssueMapViewPage(_latLng);
+                                        }),
+                                      );
+                                      if (l != null) {
+                                        debugPrint(
+                                            "Location from Map: ${l.toString()}");
+                                        _latLng = l;
+                                      }
+                                    }
+                                  : null,
+                              label: const Text("Open Map"),
+                              icon: const Icon(
+                                Icons.add_location_alt_outlined,
+                                size: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

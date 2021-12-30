@@ -41,7 +41,6 @@ class ProjectInfoPageState extends State<ProjectInfoPage> {
     String apiToken = _userCred["redmine_token"].toString();
 
     _projectInfo = await NetworkHelper.getProject(url, apiToken, _projectId);
-    debugPrint(_projectInfo.toString());
 
     setState(() {
       _isLoaded = true;
