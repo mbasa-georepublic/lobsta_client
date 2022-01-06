@@ -45,7 +45,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
     }
 
     _issue = await NetworkHelper.getIssue(_url, _apiToken, _issueId);
-
+    debugPrint("ISSUE: ${_issue.toString()}");
     if (_issue["geojson"] != null && _issue["geojson"].toString().isNotEmpty) {
       try {
         Map<String, dynamic> geom = _issue["geojson"]["geometry"];
@@ -346,6 +346,20 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                           Container(
                             padding: const EdgeInsets.all(7),
                             child: const Text(
+                              "Spent Hours",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            child: Text(
+                                "${numFormat(_issue["total_spent_hours"] ?? 0.0)} h"),
+                          ),
+                        ]),
+                        TableRow(children: [
+                          Container(
+                            padding: const EdgeInsets.all(7),
+                            child: const Text(
                               "Tracker",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
@@ -397,5 +411,9 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                   ],
                 ),
               ));
+  }
+
+  String numFormat(double n) {
+    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 2);
   }
 }

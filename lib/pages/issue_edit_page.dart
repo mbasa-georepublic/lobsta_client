@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
@@ -37,6 +39,7 @@ class IssueEditPageState extends State<IssueEditPage> {
   final List<DropdownMenuItem<int>> _users = [];
   final List<DropdownMenuItem<int>> _doneRatio = [];
   final List<DropdownMenuItem<int>> _issueStatus = [];
+  final List<DropdownMenuItem<int>> _timeActivities = [];
 
   bool _isLoaded = false;
   //bool _isPrivate = true;
@@ -48,6 +51,9 @@ class IssueEditPageState extends State<IssueEditPage> {
   int _projectId = 0;
   int _doneRatioId = 0;
   int _issueStatusId = 0;
+  int _timeActivity = 0;
+
+  double _spentHours = 0.0;
 
   LatLng _latLng = LatLng(0, 0);
   Map<String, dynamic> _issue = {};
@@ -100,6 +106,8 @@ class IssueEditPageState extends State<IssueEditPage> {
 
     var trackers = await NetworkHelper.getTrackers(_mUrl, _apiKey);
     var issueStatus = await NetworkHelper.getIssueStatus(_mUrl, _apiKey);
+    var timeActivities =
+        await NetworkHelper.getTimeEntryActivities(_mUrl, _apiKey);
     var members =
         await NetworkHelper.getMemberships(_mUrl, _apiKey, _projectId);
 
@@ -115,6 +123,26 @@ class IssueEditPageState extends State<IssueEditPage> {
           value: c,
         ),
       );
+    }
+
+    for (Map<String, dynamic> ta in timeActivities) {
+      if (ta["active"] == true) {
+        _timeActivity = ta["id"];
+        _timeActivities.add(
+          DropdownMenuItem(
+            child: Text(ta["name"].toString()),
+            value: ta["id"],
+          ),
+        );
+      }
+    }
+
+    if (_timeActivities.isEmpty) {
+      _timeActivity = 0;
+      _timeActivities.add(const DropdownMenuItem(
+        child: Text(""),
+        value: 0,
+      ));
     }
 
     for (Map<String, dynamic> s in issueStatus) {
@@ -245,6 +273,21 @@ class IssueEditPageState extends State<IssueEditPage> {
       issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
           "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
           "[${_latLng.longitude},${_latLng.latitude}]}}";
+    }
+
+    ///***
+    ///* Sending Spent Hours
+    ///***
+    if (_spentHours > 0.0 && _timeActivity > 0) {
+      Map<String, dynamic> params = {
+        "time_entry": {
+          "issue_id": _issue["id"],
+          "hours": _spentHours,
+          "activity_id": _timeActivity,
+        }
+      };
+
+      NetworkHelper.postSpentHours(_mUrl, _apiKey, params);
     }
 
     ///***
@@ -382,6 +425,41 @@ class IssueEditPageState extends State<IssueEditPage> {
                         onChanged: (i) {
                           _trackerId = i as int;
                           debugPrint("Tracker: $_trackerId");
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Spent Hours"),
+                      ),
+                      title: TextFormField(
+                        initialValue: _timeActivity > 0 ? "0.0" : "",
+                        enabled: _timeActivity > 0 ? true : false,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
+                        ],
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            v = "0.0";
+                          }
+                          _spentHours = double.tryParse(v) ?? 0.0;
+                          return null;
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 110,
+                        child: Text("Activity"),
+                      ),
+                      title: DropdownButtonFormField(
+                        items: _timeActivities,
+                        value: _timeActivity,
+                        onChanged: (i) {
+                          _timeActivity = i as int;
                         },
                       ),
                     ),

@@ -169,6 +169,40 @@ class NetworkHelper {
     return retVal;
   }
 
+  static Future<List<Map<String, dynamic>>> getTimeEntryActivities(
+      String mUrl, String apiKey) async {
+    List<Map<String, dynamic>> retVal = [];
+
+    String url = "$mUrl/enumerations/time_entry_activities.json";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("TimeEntryActivities Msg: ${response.statusMessage}");
+
+        //retVal = response.data["projects"] as List<Map<String, dynamic>>;
+        for (Map<String, dynamic> ret
+            in response.data["time_entry_activities"]) {
+          retVal.add(ret);
+        }
+      }
+    } on DioError catch (exception) {
+      debugPrint("TimeEntryActivities Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
   static Future<List<Map<String, dynamic>>> getMemberships(
       String mUrl, String apiKey, int projectId) async {
     List<Map<String, dynamic>> retVal = [];
@@ -355,6 +389,37 @@ class NetworkHelper {
     } catch (exception) {
       debugPrint("Image Error: $exception");
     }
+    return retVal;
+  }
+
+  static Future<Map<String, dynamic>> postSpentHours(
+      url, apiKey, Map<String, dynamic> params) async {
+    Map<String, dynamic> retVal = {};
+
+    String iUrl = "$url/time_entries.json";
+    try {
+      Dio dio = Dio();
+      Response response;
+
+      response = await dio.post(
+        iUrl,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+        data: params,
+      );
+      retVal = {
+        "status_code": response.statusCode,
+        "status_message": response.statusMessage,
+        "status_data": response.data,
+      };
+    } catch (e) {
+      debugPrint("SetHours Error: ${params.toString()}");
+    }
+
     return retVal;
   }
 
