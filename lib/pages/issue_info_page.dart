@@ -4,6 +4,7 @@ import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/img_view_page.dart';
 import 'package:lobsta_client/pages/issue_edit_page.dart';
+import 'package:lobsta_client/pages/issue_timer_page.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 
 import 'issue_mapview_page.dart';
@@ -45,7 +46,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
     }
 
     _issue = await NetworkHelper.getIssue(_url, _apiToken, _issueId);
-    debugPrint("ISSUE: ${_issue.toString()}");
+
     if (_issue["geojson"] != null && _issue["geojson"].toString().isNotEmpty) {
       try {
         Map<String, dynamic> geom = _issue["geojson"]["geometry"];
@@ -130,7 +131,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
             ));
           }
           noteJournals.add(Card(
-            elevation: 1.5,
+            elevation: 0.5,
             color: const Color.fromRGBO(238, 238, 232, 1),
             child: ListTile(
               isThreeLine: false,
@@ -187,6 +188,20 @@ class IssueInfoPageState extends State<IssueInfoPage> {
           title: Text("Issue #$_issueId"),
           centerTitle: true,
           actions: [
+            IconButton(
+                onPressed: () async {
+                  var s = await Navigator.push(context,
+                      MaterialPageRoute(builder: (context) {
+                    return IssueTimerPage(_issueId);
+                  }));
+                  if (s != null) {
+                    setState(() {
+                      _issue = {};
+                      getIssue();
+                    });
+                  }
+                },
+                icon: const Icon(Icons.access_alarm)),
             IconButton(
               onPressed: () async {
                 if (_issue.isNotEmpty) {

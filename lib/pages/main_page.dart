@@ -231,10 +231,12 @@ class MainPageState extends State<MainPage> {
               icon: Icon(Icons.wallet_travel),
               label: "Projects",
             ),
+            /*
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
               label: "Timer",
             ),
+             */
             BottomNavigationBarItem(
               icon: Icon(Icons.account_box),
               label: "Profile",
