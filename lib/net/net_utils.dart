@@ -169,6 +169,38 @@ class NetworkHelper {
     return retVal;
   }
 
+  static Future<List<Map<String, dynamic>>> getTimeEntries(
+      String mUrl, String apiKey, String fromDate, String toDate) async {
+    List<Map<String, dynamic>> retVal = [];
+
+    String url = "$mUrl/time_entries.json?limit=100000&user_id=me"
+        "&from=$fromDate&to=$toDate";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        for (Map<String, dynamic> ret in response.data["time_entries"]) {
+          retVal.add(ret);
+        }
+      }
+    } on DioError catch (exception) {
+      debugPrint("TimeEntries Error: ${exception.message}");
+    }
+
+    return retVal;
+  }
+
   static Future<List<Map<String, dynamic>>> getTimeEntryActivities(
       String mUrl, String apiKey) async {
     List<Map<String, dynamic>> retVal = [];

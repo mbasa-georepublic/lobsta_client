@@ -3,6 +3,7 @@ import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/issue_info_page.dart';
 import 'package:lobsta_client/pages/login_page.dart';
+import 'package:lobsta_client/pages/profile_page.dart';
 import 'package:lobsta_client/pages/project_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -153,7 +154,7 @@ class MainPageState extends State<MainPage> {
         );
         break;
       case 2:
-        _mainWidget = Container();
+        _mainWidget = ProfilePage(_userCred);
         break;
       default:
         _mainWidget = Container();

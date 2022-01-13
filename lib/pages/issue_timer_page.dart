@@ -163,13 +163,13 @@ class IssueTimerPageState extends State<IssueTimerPage> {
                       ),
                       SizedBox(
                         width: 380,
-                        height: 40,
+                        //height: 40,
                         child: ListTile(
                           leading: const SizedBox(
                             width: 110,
                             child: Text("Select Activity: "),
                           ),
-                          title: DropdownButtonFormField(
+                          title: DropdownButton(
                             isExpanded: true,
                             //isDense: true,
                             items: _timeActivities,
