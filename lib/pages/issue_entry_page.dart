@@ -248,6 +248,8 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         child: Text("Assigned To"),
                       ),
                       title: DropdownButtonFormField(
+                        isExpanded: true,
+                        isDense: true,
                         items: _users,
                         value: _userId,
                         onChanged: (i) {
@@ -261,6 +263,8 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         child: Text("Tracker"),
                       ),
                       title: DropdownButtonFormField(
+                        isExpanded: true,
+                        isDense: true,
                         items: _trackers,
                         value: _trackerId,
                         onChanged: (i) {

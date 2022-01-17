@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
@@ -407,6 +406,8 @@ class IssueEditPageState extends State<IssueEditPage> {
                         child: Text("Status"),
                       ),
                       title: DropdownButtonFormField(
+                        isExpanded: true,
+                        isDense: true,
                         items: _issueStatus,
                         value: _issueStatusId,
                         onChanged: (i) {
@@ -420,6 +421,8 @@ class IssueEditPageState extends State<IssueEditPage> {
                         child: Text("Tracker"),
                       ),
                       title: DropdownButtonFormField(
+                        isExpanded: true,
+                        isDense: true,
                         items: _trackers,
                         value: _trackerId,
                         onChanged: (i) {
@@ -456,6 +459,8 @@ class IssueEditPageState extends State<IssueEditPage> {
                         child: Text("Activity"),
                       ),
                       title: DropdownButtonFormField(
+                        isDense: true,
+                        isExpanded: true,
                         items: _timeActivities,
                         value: _timeActivity,
                         onChanged: (i) {
