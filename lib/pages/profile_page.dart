@@ -44,7 +44,7 @@ class ProfilePageState extends State<ProfilePage> {
 
     Map<String, double> summary = {};
     double totalHours = 0.0;
-    String userName = ret[0]["user"]["name"] ?? "";
+    String userName = ret.isNotEmpty ? ret[0]["user"]["name"] : "";
 
     for (Map<String, dynamic> r in ret) {
       String key = "${r["project"]["name"]} : ${r["activity"]["name"]}";
