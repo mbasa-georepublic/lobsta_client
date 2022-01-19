@@ -542,28 +542,60 @@ class IssueEditPageState extends State<IssueEditPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              String? s =
-                                  await CameraUtils.loadImageFromGallery();
-                              if (s != null) {
-                                setState(() {
-                                  _imageFile = s;
-                                });
-                              }
-                            },
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(Colors.grey),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  side: const BorderSide(color: Colors.white10),
+                          Column(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () async {
+                                  String? s =
+                                      await CameraUtils.loadImageFromGallery();
+                                  if (s != null) {
+                                    setState(() {
+                                      _imageFile = s;
+                                    });
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.grey),
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      side: const BorderSide(
+                                          color: Colors.white10),
+                                    ),
+                                  ),
                                 ),
+                                child: const Text("Chhose Photo"),
                               ),
-                            ),
-                            child: const Text("Add Photo"),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  String? s = await CameraUtils.takePicture(
+                                      imageQuality: 50);
+                                  if (s != null) {
+                                    setState(() {
+                                      _imageFile = s;
+                                    });
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.grey),
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      side: const BorderSide(
+                                          color: Colors.white10),
+                                    ),
+                                  ),
+                                ),
+                                child: const Text("Take Photo"),
+                              ),
+                            ],
                           ),
                           const SizedBox(
                             width: 15,
