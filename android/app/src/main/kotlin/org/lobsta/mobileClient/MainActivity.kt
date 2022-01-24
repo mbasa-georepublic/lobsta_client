@@ -1,4 +1,4 @@
-package org.lobsta.lobstaClient
+package org.lobsta.mobileClient
 
 import io.flutter.embedding.android.FlutterActivity
 
