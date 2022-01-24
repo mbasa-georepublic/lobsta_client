@@ -39,7 +39,7 @@ class SwitchAccountPageState extends State<SwitchAccountPage> {
     if (loggedAcct.isEmpty) {
       la.add(
         const SizedBox(
-          height: 180,
+          height: 100,
           child: Center(
             child:
                 Text("No other Accounts Registered. Login into other Accounts"),
