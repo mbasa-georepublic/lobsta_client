@@ -5,10 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class NetworkHelper {
-  static Future<String> getApiKey(
+  static Future<Map<String, dynamic>> getApiKey(
       String user, String password, String url) async {
     Dio dio = Dio();
-    String retVal = "";
+    Map<String, dynamic> retVal = {};
     String mUrl = "$url/my/account.json";
 
     try {
@@ -28,7 +28,7 @@ class NetworkHelper {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> r = response.data;
-        retVal = r["user"]["api_key"];
+        retVal = r["user"];
       }
     } on DioError catch (e) {
       debugPrint("getApiKey Network Error: ${e.message}");

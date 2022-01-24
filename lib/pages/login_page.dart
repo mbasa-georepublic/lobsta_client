@@ -145,16 +145,28 @@ class LoginPageState extends State<LoginPage> {
                             DialogUtil.showOnSendDialog(
                                 context, "Sending Login Information");
 
-                            String apiToken = await NetworkHelper.getApiKey(
-                                _user, _password, _url);
+                            _url = _url.trim();
+
+                            if (_url.endsWith("/")) {
+                              _url = _url.substring(0, _url.length - 1);
+                            }
+
+                            Map<String, dynamic> retVal =
+                                await NetworkHelper.getApiKey(
+                                    _user, _password, _url);
 
                             Navigator.pop(context);
 
-                            if (apiToken.isNotEmpty) {
-                              debugPrint("Registered: $apiToken");
+                            if (retVal.isNotEmpty) {
+                              debugPrint("Registered: ${retVal["api_key"]}");
 
-                              _dbh.insertUserCredential(
-                                  _user, _password, _url, apiToken);
+                              await _dbh.insertUserCredential(
+                                  _user,
+                                  _password,
+                                  _url,
+                                  retVal["lastname"] ?? _user,
+                                  retVal["firstname"] ?? "",
+                                  retVal["api_key"]);
 
                               Navigator.pushAndRemoveUntil(context,
                                   MaterialPageRoute(

@@ -5,6 +5,7 @@ import 'package:lobsta_client/pages/issue_info_page.dart';
 import 'package:lobsta_client/pages/login_page.dart';
 import 'package:lobsta_client/pages/profile_page.dart';
 import 'package:lobsta_client/pages/project_page.dart';
+import 'package:lobsta_client/pages/switch_account_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -36,17 +37,31 @@ class MainPageState extends State<MainPage> {
     });
   }
 
-  void handleMenu(int code) {
+  void handleMenu(int code) async {
     debugPrint("Code: $code");
     switch (code) {
       case 1: //logout
-        _dbh.deleteUserCredential();
+        await _dbh.deleteUserCredential();
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
           builder: (context) {
             return const LoginPage();
           },
         ), (route) => false);
         break;
+      case 2:
+        bool? retVal = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return const SwitchAccountPage();
+          }),
+        );
+        if (retVal != null && retVal) {
+          setState(() {
+            _isLoaded = false;
+            _bottomBarSel = 0;
+            initScreen();
+          });
+        }
     }
   }
 
@@ -205,6 +220,10 @@ class MainPageState extends State<MainPage> {
             ),*/
             PopupMenuButton<int>(
               itemBuilder: (context) => [
+                const PopupMenuItem(
+                  child: Text("Switch Account"),
+                  value: 2,
+                ),
                 const PopupMenuItem(
                   child: Text("Log out"),
                   value: 1,
