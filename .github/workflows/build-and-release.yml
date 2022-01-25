@@ -27,7 +27,7 @@ jobs:
       - name: Build Android App
         run: |
           flutter build apk --release
-          build/app/outputs/apk/release
+          cd build/app/outputs/apk/release
           mv app-release.apk "lobsta_client_$GITHUB_REF_NAME.apk"
       - name: Build iOS App
         run: |
