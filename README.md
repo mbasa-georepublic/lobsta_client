@@ -81,7 +81,7 @@ flutter build appbundle
 
 ## Contributing and Support
 
-The project appreciates any [contributions](https://github.com/georepublic/.github/blob/main/CONTRIBUTING.md)! Feel free to contact us for [reporting problems and support](https://github.com/georepublic/.github/blob/main/CONTRIBUTING.md).
+The project appreciates any [contributions](https://github.com/georepublic/.github/blob/main/CONTRIBUTING.md)! Feel free to contact us for [reporting problems and support](https://github.com/Georepublic/lobsta_client/issues).
 
 ## Version History
 
