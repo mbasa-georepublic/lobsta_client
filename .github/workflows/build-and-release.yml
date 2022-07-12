@@ -1,0 +1,60 @@
+name: Build and Release Apps
+
+on:
+  release:
+    types: [created]
+
+env:
+  PRODUCT_NAME: LOBSTA_Client
+
+jobs:
+  build:
+    name: Build Apps
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '15'
+          distribution: 'adopt'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - name: Enable MacOS
+        run: flutter config --enable-macos-desktop
+      - name: Install pub Dependencies
+        run: flutter pub get
+      - name: Build Android App
+        run: |
+          flutter build apk --release
+          cd build/app/outputs/apk/release
+          mv app-release.apk "${{ env.PRODUCT_NAME }}_$GITHUB_REF_NAME.apk"
+      - name: Build iOS App
+        run: |
+          flutter build ios --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cd Payload
+          ln -s ../Runner.app
+          cd ..
+          zip -r "${{ env.PRODUCT_NAME }}_$GITHUB_REF_NAME.ipa" Payload
+      - name: Build Web App
+        run: |
+          flutter build web
+          cd build/web
+          zip -r "${{ env.PRODUCT_NAME }}_$GITHUB_REF_NAME-web-app.zip" .
+      - name: Build MacOS App
+        run: |
+          flutter build macos --release
+          cd build/macos/Build/Products/
+          zip -r "${{ env.PRODUCT_NAME }}_$GITHUB_REF_NAME-macos-app.zip" Release
+      - name: Release Apps
+        uses: ncipollo/release-action@v1
+        with:
+          replacesArtifacts: true
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: 'build/app/outputs/apk/release/*.apk,build/ios/iphoneos/*.ipa,build/web/*.zip,build/macos/Build/Products/*.zip'
