@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
-import 'package:lobsta_client/pages/issue_mapview_page.dart';
 import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
+
+import 'issue_mapview_page_pt.dart';
 
 class IssueEntryPage extends StatefulWidget {
   final int _projectId;
@@ -365,7 +366,7 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                                       var l = await Navigator.push(
                                         context,
                                         MaterialPageRoute(builder: (context) {
-                                          return IssueMapViewPage(_latLng);
+                                          return IssueMapViewPagePt(_latLng);
                                         }),
                                       );
                                       if (l != null) {

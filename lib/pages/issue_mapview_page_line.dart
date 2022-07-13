@@ -2,76 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class IssueMapViewPage extends StatefulWidget {
-  final LatLng _latLng;
+class IssueMapViewPageLine extends StatefulWidget {
+  final Polyline _polyline;
   final bool forEdit;
 
-  const IssueMapViewPage(this._latLng, {this.forEdit = true, Key? key})
+  const IssueMapViewPageLine(this._polyline, {this.forEdit = true, Key? key})
       : super(key: key);
 
   @override
-  IssueMapViewPageState createState() => IssueMapViewPageState();
+  IssueMapViewPageLineState createState() => IssueMapViewPageLineState();
 }
 
-class IssueMapViewPageState extends State<IssueMapViewPage> {
+class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
   final MapController _mapController = MapController();
   MapOptions _mapOptions = MapOptions();
-  final List<Marker> _markers = [];
-  LatLng _initialPoint = LatLng(35.6592979, 139.7005656);
+  Polyline _polyline = Polyline(points: []);
   LatLng _presentPoint = LatLng(0, 0);
-  bool _isFirst = true;
   bool _forEdit = true;
 
   @override
   void initState() {
     super.initState();
-
-    _initialPoint = widget._latLng;
+    _polyline = widget._polyline;
     _forEdit = widget.forEdit;
 
-    _markers.add(
-      Marker(
-        point: _initialPoint,
-        height: 80.0,
-        width: 70.0,
-        anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
-        builder: (ctx) => const Icon(
-          Icons.location_on,
-          size: 42,
-          color: Colors.deepOrange,
-        ),
-      ),
-    );
+    LatLngBounds bnd = LatLngBounds.fromPoints(_polyline.points);
+    bnd.pad(0.1);
+
     _mapOptions = MapOptions(
-        center: _initialPoint,
+        bounds: bnd,
         maxZoom: 18.0,
-        minZoom: 13.0,
+        minZoom: 10.0,
         zoom: 16.0,
         onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {});
   }
 
   _moveMap(MapPosition pos) {
     _presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
-
-    if (!_isFirst) {
-      _markers.clear();
-      _markers.add(
-        Marker(
-          point: _presentPoint,
-          height: 80.0,
-          width: 70.0,
-          anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
-          builder: (ctx) => const Icon(
-            Icons.location_on,
-            size: 42,
-            color: Colors.deepOrange,
-          ),
-        ),
-      );
-      setState(() {});
-    } else {
-      _isFirst = false;
-    }
   }
 
   @override
@@ -93,12 +60,13 @@ class IssueMapViewPageState extends State<IssueMapViewPage> {
                   urlTemplate:
                       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                   subdomains: ['a', 'b', 'c'],
-                  attributionBuilder: (_) {
-                    return const Text("© OpenStreetMap contributors");
-                  },
+                  //attributionBuilder: (_) {
+                  //  return const Text("© OpenStreetMap contributors");
+                  //},
                 ),
-                MarkerLayerOptions(
-                  markers: _markers,
+                PolylineLayerOptions(
+                  polylineCulling: false,
+                  polylines: [_polyline],
                 ),
               ],
             ),

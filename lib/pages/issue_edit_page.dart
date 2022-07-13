@@ -10,7 +10,7 @@ import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
 
-import 'issue_mapview_page.dart';
+import 'issue_mapview_page_pt.dart';
 
 class IssueEditPage extends StatefulWidget {
   final Map<String, dynamic> _issue;
@@ -515,7 +515,7 @@ class IssueEditPageState extends State<IssueEditPage> {
                                       var l = await Navigator.push(
                                         context,
                                         MaterialPageRoute(builder: (context) {
-                                          return IssueMapViewPage(_latLng);
+                                          return IssueMapViewPagePt(_latLng);
                                         }),
                                       );
                                       if (l != null) {

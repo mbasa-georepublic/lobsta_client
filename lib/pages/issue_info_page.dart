@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/img_view_page.dart';
 import 'package:lobsta_client/pages/issue_edit_page.dart';
+import 'package:lobsta_client/pages/issue_mapview_page_polygon.dart';
 import 'package:lobsta_client/pages/issue_timer_page.dart';
 import 'package:lobsta_client/pages/pdf_view_page.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 
-import 'issue_mapview_page.dart';
+import 'issue_mapview_page_line.dart';
+import 'issue_mapview_page_pt.dart';
 
 class IssueInfoPage extends StatefulWidget {
   final int _issueId;
@@ -26,7 +29,9 @@ class IssueInfoPageState extends State<IssueInfoPage> {
   String _apiToken = "";
   int _issueId = -1;
 
-  LatLng _latLng = LatLng(0, 0);
+  LatLng _latLng = LatLng(0.0, 0.0);
+  Polyline _polyline = Polyline(points: []);
+  Polygon _polygon = Polygon(points: []);
 
   final DatabaseHelper _dbh = DatabaseHelper();
 
@@ -55,6 +60,31 @@ class IssueInfoPageState extends State<IssueInfoPage> {
         if (geom.isNotEmpty && geom["type"] == "Point") {
           _latLng = LatLng(geom["coordinates"][1], geom["coordinates"][0]);
           debugPrint("LatLng: ${_latLng.toString()}");
+        } else if (geom.isNotEmpty && geom["type"] == "LineString") {
+          List<LatLng> pts = [];
+
+          for (List pt in geom["coordinates"]) {
+            pts.add(LatLng(pt[1], pt[0]));
+          }
+
+          _polyline = Polyline(
+            points: pts,
+            color: Colors.blue,
+            strokeWidth: 6.0,
+          );
+        } else if (geom.isNotEmpty && geom["type"] == "Polygon") {
+          List<LatLng> pts = [];
+
+          for (List pt in geom["coordinates"][0]) {
+            pts.add(LatLng(pt[1], pt[0]));
+          }
+
+          _polygon = Polygon(
+              points: pts,
+              isFilled: true,
+              color: Colors.blue.withOpacity(0.2),
+              borderColor: Colors.blueAccent,
+              borderStrokeWidth: 6.0);
         }
       } catch (e) {
         debugPrint("GeoJSON Error: ${e.toString()}");
@@ -77,7 +107,9 @@ class IssueInfoPageState extends State<IssueInfoPage> {
     List<Widget> noteJournals = [];
     List<Widget> mapLocation = [];
 
-    if (_latLng.longitude != 0 && _latLng.latitude != 0) {
+    if ((_latLng.longitude != 0 && _latLng.latitude != 0) ||
+        _polyline.points.isNotEmpty ||
+        _polygon.points.isNotEmpty) {
       mapLocation.add(
         const Text(
           "Location",
@@ -98,10 +130,20 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) {
-                    return IssueMapViewPage(
-                      _latLng,
-                      forEdit: false,
-                    );
+                    return _polyline.points.isNotEmpty
+                        ? IssueMapViewPageLine(
+                            _polyline,
+                            forEdit: false,
+                          )
+                        : _polygon.points.isNotEmpty
+                            ? IssueMapViewPagePolygon(
+                                _polygon,
+                                forEdit: false,
+                              )
+                            : IssueMapViewPagePt(
+                                _latLng,
+                                forEdit: false,
+                              );
                   }),
                 );
               },
