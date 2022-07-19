@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/pages/issue_mapview_page_line.dart';
+import 'package:lobsta_client/pages/issue_mapview_page_polygon.dart';
 import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
@@ -55,6 +58,9 @@ class IssueEditPageState extends State<IssueEditPage> {
   double _spentHours = 0.0;
 
   LatLng _latLng = LatLng(0, 0);
+  Polygon _polygon = Polygon(points: []);
+  Polyline _polyline = Polyline(points: []);
+
   Map<String, dynamic> _issue = {};
 
   @override
@@ -79,6 +85,31 @@ class IssueEditPageState extends State<IssueEditPage> {
         if (geom.isNotEmpty && geom["type"] == "Point") {
           _latLng = LatLng(geom["coordinates"][1], geom["coordinates"][0]);
           debugPrint("LatLng: ${_latLng.toString()}");
+        } else if (geom.isNotEmpty && geom["type"] == "LineString") {
+          List<LatLng> pts = [];
+
+          for (List pt in geom["coordinates"]) {
+            pts.add(LatLng(pt[1], pt[0]));
+          }
+
+          _polyline = Polyline(
+            points: pts,
+            color: Colors.blue,
+            strokeWidth: 6.0,
+          );
+        } else if (geom.isNotEmpty && geom["type"] == "Polygon") {
+          List<LatLng> pts = [];
+
+          for (List pt in geom["coordinates"][0]) {
+            pts.add(LatLng(pt[1], pt[0]));
+          }
+
+          _polygon = Polygon(
+              points: pts,
+              isFilled: true,
+              color: Colors.blue.withOpacity(0.2),
+              borderColor: Colors.blueAccent,
+              borderStrokeWidth: 6.0);
         }
       } catch (e) {
         debugPrint("GeoJSON Error: ${e.toString()}");
@@ -269,9 +300,28 @@ class IssueEditPageState extends State<IssueEditPage> {
     ///* Setting Location
     ///***
     if (_useLocation) {
-      issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
-          "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
-          "[${_latLng.longitude},${_latLng.latitude}]}}";
+      if (_polyline.points.isNotEmpty) {
+        int len = _polyline.points.length;
+
+        String coords = "[[${_polyline.points[0].longitude},"
+            "${_polyline.points[0].latitude}],";
+
+        for (int i = 1; i < len - 1; i++) {
+          coords += "[${_polyline.points[i].longitude},"
+              "${_polyline.points[i].latitude}],";
+        }
+
+        coords += "[${_polyline.points[len - 1].longitude},"
+            "${_polyline.points[len - 1].latitude}]]";
+
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"LineString\",\"coordinates\": "
+            "$coords}}";
+      } else {
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
+            "[${_latLng.longitude},${_latLng.latitude}]}}";
+      }
     }
 
     ///***
@@ -512,16 +562,36 @@ class IssueEditPageState extends State<IssueEditPage> {
                             TextButton.icon(
                               onPressed: _useLocation
                                   ? () async {
-                                      var l = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) {
-                                          return IssueMapViewPagePt(_latLng);
-                                        }),
-                                      );
-                                      if (l != null) {
+                                      if (_polygon.points.isNotEmpty) {
+                                        var l = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) {
+                                            return IssueMapViewPagePolygon(
+                                                _polygon);
+                                          }),
+                                        );
+                                      } else if (_polyline.points.isNotEmpty) {
+                                        _polyline = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) {
+                                            return IssueMapViewPageLine(
+                                                _polyline);
+                                          }),
+                                        );
                                         debugPrint(
-                                            "Location from Map: ${l.toString()}");
-                                        _latLng = l;
+                                            "Line: ${_polyline.points.toString()}");
+                                      } else {
+                                        var l = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) {
+                                            return IssueMapViewPagePt(_latLng);
+                                          }),
+                                        );
+                                        if (l != null) {
+                                          debugPrint(
+                                              "Location from Map: ${l.toString()}");
+                                          _latLng = l;
+                                        }
                                       }
                                     }
                                   : null,

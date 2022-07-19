@@ -42,6 +42,8 @@ dependencies:
   location: ^4.2.0
   image_picker: ^0.8.4+4
   flutter_map: ^1.1.0
+  flutter_map_line_editor: ^2.0.0
+  flutter_map_dragmarker: ^2.0.0
   flutter_cached_pdfview: ^0.4.1
 
 dev_dependencies:
