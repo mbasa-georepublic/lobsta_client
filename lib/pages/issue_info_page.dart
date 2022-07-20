@@ -133,6 +133,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                     return _polyline.points.isNotEmpty
                         ? IssueMapViewPageLine(
                             _polyline,
+                            _polyline.points.first,
                             forEdit: false,
                           )
                         : _polygon.points.isNotEmpty

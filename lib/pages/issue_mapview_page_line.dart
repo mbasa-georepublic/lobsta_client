@@ -7,8 +7,10 @@ import 'package:latlong2/latlong.dart';
 class IssueMapViewPageLine extends StatefulWidget {
   final Polyline _polyline;
   final bool forEdit;
+  final LatLng centerPt;
 
-  const IssueMapViewPageLine(this._polyline, {this.forEdit = true, Key? key})
+  const IssueMapViewPageLine(this._polyline, this.centerPt,
+      {this.forEdit = true, Key? key})
       : super(key: key);
 
   @override
@@ -30,8 +32,15 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
     _polyline = widget._polyline;
     _forEdit = widget.forEdit;
 
-    LatLngBounds bnd = LatLngBounds.fromPoints(_polyline.points);
-    bnd.pad(0.1);
+    LatLngBounds bnd = LatLngBounds();
+
+    if (_polyline.points.isNotEmpty) {
+      bnd = LatLngBounds.fromPoints(_polyline.points);
+      bnd.pad(0.1);
+    } else {
+      List<LatLng> t = [widget.centerPt];
+      bnd = LatLngBounds.fromPoints(t);
+    }
 
     if (_forEdit) {
       _mapOptions = MapOptions(
@@ -111,7 +120,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
             flex: 1,
             child: Center(
               child: ElevatedButton(
-                child: Text(_forEdit ? "Save" : "Return"),
+                child: Text(_forEdit ? "Save Edit" : "Return"),
                 onPressed: () => Navigator.pop(context, _polyline),
               ),
             ),

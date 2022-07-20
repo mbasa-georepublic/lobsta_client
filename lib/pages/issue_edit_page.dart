@@ -301,22 +301,17 @@ class IssueEditPageState extends State<IssueEditPage> {
     ///***
     if (_useLocation) {
       if (_polyline.points.isNotEmpty) {
-        int len = _polyline.points.length;
-
-        String coords = "[[${_polyline.points[0].longitude},"
-            "${_polyline.points[0].latitude}],";
-
-        for (int i = 1; i < len - 1; i++) {
-          coords += "[${_polyline.points[i].longitude},"
-              "${_polyline.points[i].latitude}],";
-        }
-
-        coords += "[${_polyline.points[len - 1].longitude},"
-            "${_polyline.points[len - 1].latitude}]]";
+        String coords = IssueUtils.createCoordString(_polyline.points);
 
         issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
             "\"geometry\": {\"type\": \"LineString\",\"coordinates\": "
             "$coords}}";
+      } else if (_polygon.points.isNotEmpty) {
+        String coords = IssueUtils.createCoordString(_polygon.points);
+
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"Polygon\",\"coordinates\": "
+            "[$coords]}}";
       } else {
         issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
             "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
@@ -563,7 +558,7 @@ class IssueEditPageState extends State<IssueEditPage> {
                               onPressed: _useLocation
                                   ? () async {
                                       if (_polygon.points.isNotEmpty) {
-                                        var l = await Navigator.push(
+                                        _polygon = await Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) {
                                             return IssueMapViewPagePolygon(
@@ -575,11 +570,9 @@ class IssueEditPageState extends State<IssueEditPage> {
                                           context,
                                           MaterialPageRoute(builder: (context) {
                                             return IssueMapViewPageLine(
-                                                _polyline);
+                                                _polyline, LatLng(0, 0));
                                           }),
                                         );
-                                        debugPrint(
-                                            "Line: ${_polyline.points.toString()}");
                                       } else {
                                         var l = await Navigator.push(
                                           context,

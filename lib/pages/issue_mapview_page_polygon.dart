@@ -103,7 +103,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(_forEdit ? "Choose Position" : "Map"),
+        title: Text(_forEdit ? "Edit Polygon" : "Map"),
       ),
       body: Column(
         children: [
@@ -119,7 +119,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
             flex: 1,
             child: Center(
               child: ElevatedButton(
-                child: Text(_forEdit ? "Set Position" : "Return"),
+                child: Text(_forEdit ? "Save Edit" : "Return"),
                 onPressed: () => Navigator.pop(context, _presentPoint),
               ),
             ),

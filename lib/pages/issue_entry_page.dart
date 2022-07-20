@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
@@ -9,6 +10,7 @@ import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
 import 'package:location/location.dart';
 
+import 'issue_mapview_page_line.dart';
 import 'issue_mapview_page_pt.dart';
 
 class IssueEntryPage extends StatefulWidget {
@@ -29,11 +31,27 @@ class IssueEntryPageState extends State<IssueEntryPage> {
   bool _isLoaded = false;
   bool _isPrivate = true;
   bool _isPriority = false;
+
   bool _useLocation = true;
+
+  Polyline _polyline = Polyline(
+    points: [],
+    color: Colors.blue,
+    strokeWidth: 6.0,
+  );
+
+  Polygon _polygon = Polygon(
+      points: [],
+      isFilled: true,
+      color: Colors.blue.withOpacity(0.2),
+      borderColor: Colors.blueAccent,
+      borderStrokeWidth: 6.0);
 
   int _userId = 0;
   int _trackerId = 0;
   int _projectId = 0;
+
+  int _geomType = 0;
 
   String _mUrl = "";
   String _apiKey = "";
@@ -163,9 +181,23 @@ class IssueEntryPageState extends State<IssueEntryPage> {
     ///* Setting Location
     ///***
     if (_useLocation) {
-      issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
-          "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
-          "[${_latLng.longitude},${_latLng.latitude}]}}";
+      if (_geomType == 0) {
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"Point\",\"coordinates\": "
+            "[${_latLng.longitude},${_latLng.latitude}]}}";
+      } else if (_geomType == 1 && _polyline.points.isNotEmpty) {
+        String coords = IssueUtils.createCoordString(_polyline.points);
+
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"LineString\",\"coordinates\": "
+            "$coords}}";
+      } else if (_geomType == 2 && _polygon.points.isNotEmpty) {
+        String coords = IssueUtils.createCoordString(_polygon.points);
+
+        issueParams["geojson"] = "{\"type\": \"Feature\",\"properties\": {},"
+            "\"geometry\": {\"type\": \"Polygon\",\"coordinates\": "
+            "[$coords]}}";
+      }
     }
 
     ///***
@@ -344,16 +376,18 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                       leading: const SizedBox(
                         width: 70,
                       ),
-                      title: CheckboxListTile(
+                      title: RadioListTile(
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
-                        value: _useLocation,
+                        value: 0,
+                        groupValue: _geomType,
                         onChanged: (v) async {
-                          _useLocation = v!;
+                          _useLocation = true;
+                          _geomType = int.parse(v.toString());
                           setState(() {});
                         },
                         title: const Text(
-                          "Use Location",
+                          "Input Location Point",
                           style: TextStyle(fontSize: 15),
                         ),
                         subtitle: Row(
@@ -361,7 +395,7 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             TextButton.icon(
-                              onPressed: _useLocation
+                              onPressed: _geomType == 0
                                   ? () async {
                                       var l = await Navigator.push(
                                         context,
@@ -384,6 +418,104 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
+                      title: RadioListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: 1,
+                        onChanged: (v) async {
+                          _useLocation = true;
+                          _geomType = int.parse(v.toString());
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Input Location Line",
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        subtitle: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
+                              onPressed: _geomType == 1
+                                  ? () async {
+                                      _polyline = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) {
+                                          return IssueMapViewPageLine(
+                                              _polyline, _latLng);
+                                        }),
+                                      );
+                                    }
+                                  : null,
+                              label: const Text("Open Map"),
+                              icon: const Icon(
+                                Icons.add_location_alt_outlined,
+                                size: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        groupValue: _geomType,
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
+                      title: RadioListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: 2,
+                        onChanged: (v) async {
+                          _useLocation = true;
+                          _geomType = int.parse(v.toString());
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Input Location Polygon",
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        subtitle: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
+                              onPressed: _geomType == 2
+                                  ? () async {
+                                      var l = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) {
+                                          return IssueMapViewPageLine(
+                                              Polyline(
+                                                points: [],
+                                                color: Colors.blue,
+                                                strokeWidth: 6.0,
+                                              ),
+                                              _latLng);
+                                        }),
+                                      );
+                                      if (l != null) {
+                                        debugPrint(
+                                            "Location from Map: ${l.toString()}");
+                                        // _latLng = l;
+                                      }
+                                    }
+                                  : null,
+                              label: const Text("Open Map"),
+                              icon: const Icon(
+                                Icons.add_location_alt_outlined,
+                                size: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        groupValue: _geomType,
                       ),
                     ),
                     const SizedBox(
