@@ -562,7 +562,7 @@ class IssueEditPageState extends State<IssueEditPage> {
                                           context,
                                           MaterialPageRoute(builder: (context) {
                                             return IssueMapViewPagePolygon(
-                                                _polygon);
+                                                _polygon, LatLng(0, 0));
                                           }),
                                         );
                                       } else if (_polyline.points.isNotEmpty) {

@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
+import 'package:lobsta_client/pages/issue_mapview_page_polygon.dart';
 import 'package:lobsta_client/utils/camera_utils.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/issue_utils.dart';
@@ -488,23 +489,13 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                             TextButton.icon(
                               onPressed: _geomType == 2
                                   ? () async {
-                                      var l = await Navigator.push(
+                                      _polygon = await Navigator.push(
                                         context,
                                         MaterialPageRoute(builder: (context) {
-                                          return IssueMapViewPageLine(
-                                              Polyline(
-                                                points: [],
-                                                color: Colors.blue,
-                                                strokeWidth: 6.0,
-                                              ),
-                                              _latLng);
+                                          return IssueMapViewPagePolygon(
+                                              _polygon, _latLng);
                                         }),
                                       );
-                                      if (l != null) {
-                                        debugPrint(
-                                            "Location from Map: ${l.toString()}");
-                                        // _latLng = l;
-                                      }
                                     }
                                   : null,
                               label: const Text("Open Map"),

@@ -6,9 +6,11 @@ import 'package:latlong2/latlong.dart';
 
 class IssueMapViewPagePolygon extends StatefulWidget {
   final Polygon _polygon;
+  final LatLng centerPt;
   final bool forEdit;
 
-  const IssueMapViewPagePolygon(this._polygon, {this.forEdit = true, Key? key})
+  const IssueMapViewPagePolygon(this._polygon, this.centerPt,
+      {this.forEdit = true, Key? key})
       : super(key: key);
 
   @override
@@ -19,7 +21,6 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
   final MapController _mapController = MapController();
   MapOptions _mapOptions = MapOptions();
   Polygon _polygon = Polygon(points: []);
-  LatLng _presentPoint = LatLng(0, 0);
   bool _forEdit = true;
 
   late PolyEditor _polyEditor;
@@ -31,8 +32,15 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     _polygon = widget._polygon;
     _forEdit = widget.forEdit;
 
-    LatLngBounds bnd = LatLngBounds.fromPoints(_polygon.points);
-    bnd.pad(0.1);
+    LatLngBounds bnd = LatLngBounds();
+
+    if (_polygon.points.isNotEmpty) {
+      bnd = LatLngBounds.fromPoints(_polygon.points);
+      bnd.pad(0.1);
+    } else {
+      List<LatLng> l = [widget.centerPt];
+      bnd = LatLngBounds.fromPoints(l);
+    }
 
     if (_forEdit) {
       _mapOptions = MapOptions(
@@ -76,10 +84,6 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     super.deactivate();
   }
 
-  _moveMap(MapPosition pos) {
-    _presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
-  }
-
   @override
   Widget build(BuildContext context) {
     List<LayerOptions> layers = [
@@ -91,7 +95,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         //},
       ),
       PolygonLayerOptions(
-        polygonCulling: true,
+        polygonCulling: false,
         polygons: [_polygon],
       ),
     ];
@@ -120,7 +124,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
             child: Center(
               child: ElevatedButton(
                 child: Text(_forEdit ? "Save Edit" : "Return"),
-                onPressed: () => Navigator.pop(context, _presentPoint),
+                onPressed: () => Navigator.pop(context, _polygon),
               ),
             ),
           ),

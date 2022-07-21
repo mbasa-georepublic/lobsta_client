@@ -21,7 +21,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
   final MapController _mapController = MapController();
   MapOptions _mapOptions = MapOptions();
   Polyline _polyline = Polyline(points: []);
-  LatLng _presentPoint = LatLng(0, 0);
+  //LatLng _presentPoint = LatLng(0, 0);
   bool _forEdit = true;
 
   late PolyEditor _polyEditor;
@@ -77,7 +77,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
   }
 
   _moveMap(MapPosition pos) {
-    _presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
+    //_presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
   }
 
   @override

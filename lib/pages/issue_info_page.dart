@@ -139,6 +139,7 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                         : _polygon.points.isNotEmpty
                             ? IssueMapViewPagePolygon(
                                 _polygon,
+                                LatLng(0, 0),
                                 forEdit: false,
                               )
                             : IssueMapViewPagePt(
