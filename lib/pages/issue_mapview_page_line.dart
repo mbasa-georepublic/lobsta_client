@@ -70,8 +70,8 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
     _polyEditor = PolyEditor(
       addClosePathMarker: false,
       points: _polyline.points,
-      pointIcon: const Icon(Icons.crop_square, size: 25),
-      intermediateIcon: const Icon(Icons.lens, size: 15, color: Colors.grey),
+      pointIcon: const Icon(Icons.crop_square, size: 30),
+      intermediateIcon: const Icon(Icons.lens, size: 30, color: Colors.grey),
       callbackRefresh: () => {setState(() {})},
     );
   }

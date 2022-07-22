@@ -33,7 +33,7 @@ class IssueEntryPageState extends State<IssueEntryPage> {
   bool _isPrivate = true;
   bool _isPriority = false;
 
-  bool _useLocation = true;
+  bool _useLocation = false;
 
   Polyline _polyline = Polyline(
     points: [],
@@ -52,7 +52,7 @@ class IssueEntryPageState extends State<IssueEntryPage> {
   int _trackerId = 0;
   int _projectId = 0;
 
-  int _geomType = 0;
+  int _geomType = -1;
 
   String _mUrl = "";
   String _apiKey = "";
@@ -377,16 +377,38 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                       leading: const SizedBox(
                         width: 70,
                       ),
+                      title: CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: _useLocation,
+                        onChanged: (v) {
+                          _useLocation = v!;
+                          if (!_useLocation) {
+                            _geomType = -1;
+                          }
+                          setState(() {});
+                        },
+                        title: const Text(
+                          "Use Location",
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const SizedBox(
+                        width: 70,
+                      ),
                       title: RadioListTile(
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
                         value: 0,
                         groupValue: _geomType,
-                        onChanged: (v) async {
-                          _useLocation = true;
-                          _geomType = int.parse(v.toString());
-                          setState(() {});
-                        },
+                        onChanged: _useLocation
+                            ? (v) async {
+                                _geomType = int.parse(v.toString());
+                                setState(() {});
+                              }
+                            : null,
                         title: const Text(
                           "Input Location Point",
                           style: TextStyle(fontSize: 15),
@@ -429,11 +451,12 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
                         value: 1,
-                        onChanged: (v) async {
-                          _useLocation = true;
-                          _geomType = int.parse(v.toString());
-                          setState(() {});
-                        },
+                        onChanged: _useLocation
+                            ? (v) async {
+                                _geomType = int.parse(v.toString());
+                                setState(() {});
+                              }
+                            : null,
                         title: const Text(
                           "Input Location Line",
                           style: TextStyle(fontSize: 15),
@@ -473,11 +496,12 @@ class IssueEntryPageState extends State<IssueEntryPage> {
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
                         value: 2,
-                        onChanged: (v) async {
-                          _useLocation = true;
-                          _geomType = int.parse(v.toString());
-                          setState(() {});
-                        },
+                        onChanged: _useLocation
+                            ? (v) async {
+                                _geomType = int.parse(v.toString());
+                                setState(() {});
+                              }
+                            : null,
                         title: const Text(
                           "Input Location Polygon",
                           style: TextStyle(fontSize: 15),

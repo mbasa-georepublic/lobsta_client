@@ -73,8 +73,8 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     _polyEditor = PolyEditor(
       addClosePathMarker: true,
       points: _polygon.points,
-      pointIcon: const Icon(Icons.crop_square, size: 23),
-      intermediateIcon: const Icon(Icons.lens, size: 15, color: Colors.grey),
+      pointIcon: const Icon(Icons.crop_square, size: 30),
+      intermediateIcon: const Icon(Icons.lens, size: 30, color: Colors.grey),
       callbackRefresh: () => {setState(() {})},
     );
   }
