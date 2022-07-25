@@ -17,6 +17,8 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   bool _isLoaded = false;
+  bool _diableNavBar = false;
+
   int _bottomBarSel = 0;
   Map<String, Object?> _userCred = {};
   Widget _mainWidget = Container();
@@ -187,13 +189,18 @@ class MainPageState extends State<MainPage> {
   }
 
   redraw() async {
-    _isLoaded = false;
-    setState(() {});
+    setState(() {
+      _isLoaded = false;
+      _diableNavBar = true;
+    });
 
     await buildMainWidget();
+    await Future.delayed(const Duration(seconds: 2));
 
-    _isLoaded = true;
-    setState(() {});
+    setState(() {
+      _isLoaded = true;
+      _diableNavBar = false;
+    });
   }
 
   @override
@@ -204,6 +211,8 @@ class MainPageState extends State<MainPage> {
         semanticsValue: "Waiting",
       ),
     );
+
+    debugPrint("DisableNavBar : $_diableNavBar  IsLoaded: $_isLoaded");
 
     return Scaffold(
       body: Scaffold(
@@ -268,10 +277,12 @@ class MainPageState extends State<MainPage> {
               label: "Profile",
             ),
           ],
-          onTap: (i) async {
-            _bottomBarSel = i;
-            await redraw();
-          },
+          onTap: _diableNavBar
+              ? null
+              : (i) async {
+                  _bottomBarSel = i;
+                  await redraw();
+                },
         ),
       ),
     );
