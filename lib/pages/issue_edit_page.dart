@@ -558,21 +558,29 @@ class IssueEditPageState extends State<IssueEditPage> {
                               onPressed: _useLocation
                                   ? () async {
                                       if (_polygon.points.isNotEmpty) {
-                                        _polygon = await Navigator.push(
+                                        var l = await Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) {
                                             return IssueMapViewPagePolygon(
                                                 _polygon, LatLng(0, 0));
                                           }),
                                         );
+
+                                        if (l != null) {
+                                          _polygon = l;
+                                        }
                                       } else if (_polyline.points.isNotEmpty) {
-                                        _polyline = await Navigator.push(
+                                        var l = await Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) {
                                             return IssueMapViewPageLine(
                                                 _polyline, LatLng(0, 0));
                                           }),
                                         );
+
+                                        if (l != null) {
+                                          _polyline = l;
+                                        }
                                       } else {
                                         var l = await Navigator.push(
                                           context,
