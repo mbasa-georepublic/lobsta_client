@@ -65,7 +65,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         zoom: 16.0,
         allowPanningOnScrollingParent: false,
         onTap: (_, ll) {
-          _polyEditor.add(_polygon.points, ll);
+          //_polyEditor.add(_polygon.points, ll);
         },
         //onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
       );
