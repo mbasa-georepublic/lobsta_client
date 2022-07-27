@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/dragmarker.dart';
 import 'package:flutter_map_line_editor/polyeditor.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lobsta_client/pages/map_layer_control.dart';
 
 class IssueMapViewPagePolygon extends StatefulWidget {
   final Polygon _polygon;
@@ -94,6 +95,14 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         //  return const Text("© OpenStreetMap contributors");
         //},
       ),
+      TileLayerOptions(
+        wmsOptions: WMSTileLayerOptions(
+          baseUrl: "https://gbank.gsj.jp/ows/seamlessgeology200k_b?",
+          layers: ["Basic_Version_Japanese"],
+          otherParameters: {"tiled": "true"},
+        ),
+        opacity: 0.6,
+      ),
       PolygonLayerOptions(
         polygonCulling: false,
         polygons: [_polygon],
@@ -113,10 +122,30 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         children: [
           Expanded(
             flex: 6,
-            child: FlutterMap(
-              options: _mapOptions,
-              mapController: _mapController,
-              layers: layers,
+            child: Stack(
+              children: [
+                FlutterMap(
+                  options: _mapOptions,
+                  mapController: _mapController,
+                  layers: layers,
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(30.0),
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return const MapLayerControl();
+                        }));
+                      },
+                      elevation: 10,
+                      child: const Icon(Icons.layers),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
