@@ -5,6 +5,8 @@ import 'package:flutter_map_line_editor/polyeditor.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/pages/map_layer_control.dart';
 
+import '../utils/layer_control_utils.dart';
+
 class IssueMapViewPagePolygon extends StatefulWidget {
   final Polygon _polygon;
   final LatLng centerPt;
@@ -25,10 +27,36 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
   bool _forEdit = true;
 
   late PolyEditor _polyEditor;
+  final List<MapLayer> _mapLayers = [];
 
   @override
   void initState() {
     super.initState();
+
+    MapLayer mapLayer = MapLayer.xyz(
+        "OSM Standard",
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "xyz",
+        1.0,
+        true,
+        true,
+        ['a', 'b', 'c']);
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.wms(
+        "Japan Seamless",
+        "https://gbank.gsj.jp/ows/seamlessgeology200k_b?",
+        "WMS",
+        0.6,
+        false,
+        true,
+        ["Basic_Version_Japanese"],
+        {"tiled": "true"});
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
 
     _polygon = widget._polygon;
     _forEdit = widget.forEdit;
@@ -87,27 +115,13 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
 
   @override
   Widget build(BuildContext context) {
-    List<LayerOptions> layers = [
-      TileLayerOptions(
-        urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        subdomains: ['a', 'b', 'c'],
-        //attributionBuilder: (_) {
-        //  return const Text("© OpenStreetMap contributors");
-        //},
-      ),
-      TileLayerOptions(
-        wmsOptions: WMSTileLayerOptions(
-          baseUrl: "https://gbank.gsj.jp/ows/seamlessgeology200k_b?",
-          layers: ["Basic_Version_Japanese"],
-          otherParameters: {"tiled": "true"},
-        ),
-        opacity: 0.6,
-      ),
-      PolygonLayerOptions(
-        polygonCulling: false,
-        polygons: [_polygon],
-      ),
-    ];
+    List<LayerOptions> layers =
+        LayerControlUtils.createLayerOptionsList(_mapLayers);
+
+    layers.add(PolygonLayerOptions(
+      polygonCulling: false,
+      polygons: [_polygon],
+    ));
 
     if (_forEdit) {
       layers.add(DragMarkerPluginOptions(markers: _polyEditor.edit()));
@@ -137,10 +151,12 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
                       onPressed: () {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return const MapLayerControl();
+                          return MapLayerControl(_mapLayers);
                         }));
                       },
                       elevation: 10,
+                      mini: true,
+                      tooltip: "Layer Control",
                       child: const Icon(Icons.layers),
                     ),
                   ),
