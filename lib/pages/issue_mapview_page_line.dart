@@ -4,6 +4,9 @@ import 'package:flutter_map_dragmarker/dragmarker.dart';
 import 'package:flutter_map_line_editor/polyeditor.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../utils/layer_control_utils.dart';
+import 'map_layer_control.dart';
+
 class IssueMapViewPageLine extends StatefulWidget {
   final Polyline _polyline;
   final bool forEdit;
@@ -25,6 +28,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
   bool _forEdit = true;
 
   late PolyEditor _polyEditor;
+  List<MapLayer> _mapLayers = LayerControlUtils.createMapLayerList();
 
   @override
   void initState() {
@@ -61,7 +65,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
       _mapOptions = MapOptions(
         bounds: bnd,
         maxZoom: 22.0,
-        minZoom: 10.0,
+        minZoom: 9.0,
         zoom: 16.0,
         allowPanningOnScrollingParent: false,
         onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
@@ -82,20 +86,16 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
 
   @override
   Widget build(BuildContext context) {
-    List<LayerOptions> layers = [
-      TileLayerOptions(
-        urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        subdomains: ['a', 'b', 'c'],
-        //attributionBuilder: (_) {
-        //  return const Text("© OpenStreetMap contributors");
-        //},
-      ),
+    List<LayerOptions> layers =
+        LayerControlUtils.createLayerOptionsList(_mapLayers);
+
+    layers.add(
       PolylineLayerOptions(
         polylineCulling: false,
         polylines: [_polyline],
       ),
-      //DragMarkerPluginOptions(markers: _polyEditor.edit()),
-    ];
+    );
+    //DragMarkerPluginOptions(markers: _polyEditor.edit()),
 
     if (_forEdit) {
       layers.add(DragMarkerPluginOptions(markers: _polyEditor.edit()));
@@ -110,10 +110,37 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
         children: [
           Expanded(
             flex: 6,
-            child: FlutterMap(
-              options: _mapOptions,
-              mapController: _mapController,
-              layers: layers,
+            child: Stack(
+              children: [
+                FlutterMap(
+                  options: _mapOptions,
+                  mapController: _mapController,
+                  layers: layers,
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(30.0),
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        var l = await Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return MapLayerControl(_mapLayers);
+                        }));
+                        if (l != null) {
+                          setState(() {
+                            _mapLayers = l;
+                          });
+                        }
+                      },
+                      elevation: 10,
+                      mini: true,
+                      tooltip: "Layer Control",
+                      child: const Icon(Icons.layers),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(

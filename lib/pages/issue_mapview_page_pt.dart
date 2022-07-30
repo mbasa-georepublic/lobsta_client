@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../utils/layer_control_utils.dart';
+import 'map_layer_control.dart';
+
 class IssueMapViewPagePt extends StatefulWidget {
   final LatLng _latLng;
   final bool forEdit;
@@ -21,6 +24,8 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
   LatLng _presentPoint = LatLng(0, 0);
   bool _isFirst = true;
   bool _forEdit = true;
+
+  List<MapLayer> _mapLayers = LayerControlUtils.createMapLayerList();
 
   @override
   void initState() {
@@ -45,7 +50,7 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
     _mapOptions = MapOptions(
         center: _initialPoint,
         maxZoom: 18.0,
-        minZoom: 13.0,
+        minZoom: 9.0,
         zoom: 16.0,
         onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {});
   }
@@ -76,6 +81,15 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
 
   @override
   Widget build(BuildContext context) {
+    List<LayerOptions> layers =
+        LayerControlUtils.createLayerOptionsList(_mapLayers);
+
+    layers.add(
+      MarkerLayerOptions(
+        markers: _markers,
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -85,20 +99,35 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
         children: [
           Expanded(
             flex: 6,
-            child: FlutterMap(
-              options: _mapOptions,
-              mapController: _mapController,
-              layers: [
-                TileLayerOptions(
-                  urlTemplate:
-                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                  subdomains: ['a', 'b', 'c'],
-                  //attributionBuilder: (_) {
-                  //  return const Text("© OpenStreetMap contributors");
-                  //},
+            child: Stack(
+              children: [
+                FlutterMap(
+                  options: _mapOptions,
+                  mapController: _mapController,
+                  layers: layers,
                 ),
-                MarkerLayerOptions(
-                  markers: _markers,
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    padding: const EdgeInsets.all(30.0),
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        var l = await Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return MapLayerControl(_mapLayers);
+                        }));
+                        if (l != null) {
+                          setState(() {
+                            _mapLayers = l;
+                          });
+                        }
+                      },
+                      elevation: 10,
+                      mini: true,
+                      tooltip: "Layer Control",
+                      child: const Icon(Icons.layers),
+                    ),
+                  ),
                 ),
               ],
             ),
