@@ -27,7 +27,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
   bool _forEdit = true;
 
   late PolyEditor _polyEditor;
-  final List<MapLayer> _mapLayers = [];
+  List<MapLayer> _mapLayers = [];
 
   @override
   void initState() {
@@ -39,14 +39,58 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         "xyz",
         1.0,
         true,
-        true,
+        false,
         ['a', 'b', 'c']);
 
     debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
     _mapLayers.add(mapLayer);
 
+    mapLayer = MapLayer.xyz(
+        "GSI標準地図",
+        "https://maps.gsi.go.jp/xyz/std/{z}/{x}/{y}.png?_=20210915a",
+        "xyz",
+        1.0,
+        true,
+        true, []);
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.xyz(
+        "GSI淡色地図",
+        "https://maps.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png?_=20210915a",
+        "xyz",
+        1.0,
+        true,
+        false, []);
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.xyz(
+        "GSI白地図",
+        "https://maps.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png?_=20210915a",
+        "xyz",
+        1.0,
+        true,
+        false, []);
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.xyz(
+        "GSI写真地図",
+        "https://maps.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+        "xyz",
+        1.0,
+        true,
+        false, []);
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
     mapLayer = MapLayer.wms(
-        "Japan Seamless",
+        "日本語版(基本版)",
         "https://gbank.gsj.jp/ows/seamlessgeology200k_b?",
         "WMS",
         0.6,
@@ -54,6 +98,34 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
         true,
         ["Basic_Version_Japanese"],
         {"tiled": "true"});
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.wms(
+      "重力図（ブーゲー異常）",
+      "https://gbank.gsj.jp/ows/gravdb?",
+      "WMS",
+      1.0,
+      false,
+      false,
+      ["BouguerAnomaly"],
+      {"tiled": "true"},
+    );
+
+    debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.wms(
+      "Geochemical Map",
+      "https://gbank.gsj.jp/ows/geochemmap_en?",
+      "WMS",
+      1.0,
+      false,
+      false,
+      ["GeochemicalMap"],
+      {"tiled": "true"},
+    );
 
     debugPrint("Layer Name: ${mapLayer.layerName} ID: ${mapLayer.id}");
     _mapLayers.add(mapLayer);
@@ -148,11 +220,16 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
                   child: Container(
                     padding: const EdgeInsets.all(30.0),
                     child: FloatingActionButton(
-                      onPressed: () {
-                        Navigator.push(context,
+                      onPressed: () async {
+                        var l = await Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
                           return MapLayerControl(_mapLayers);
                         }));
+                        if (l != null) {
+                          setState(() {
+                            _mapLayers = l;
+                          });
+                        }
                       },
                       elevation: 10,
                       mini: true,
