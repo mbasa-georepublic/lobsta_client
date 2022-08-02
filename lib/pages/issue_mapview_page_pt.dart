@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../utils/layer_control_utils.dart';
-import 'map_layer_control.dart';
+import 'map_layer_control_page.dart';
 
 class IssueMapViewPagePt extends StatefulWidget {
   final LatLng _latLng;
@@ -114,7 +114,7 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
                       onPressed: () async {
                         var l = await Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return MapLayerControl(_mapLayers);
+                          return MapLayerControlPage(_mapLayers);
                         }));
                         if (l != null) {
                           setState(() {

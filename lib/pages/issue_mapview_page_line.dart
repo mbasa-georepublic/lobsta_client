@@ -5,7 +5,7 @@ import 'package:flutter_map_line_editor/polyeditor.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../utils/layer_control_utils.dart';
-import 'map_layer_control.dart';
+import 'map_layer_control_page.dart';
 
 class IssueMapViewPageLine extends StatefulWidget {
   final Polyline _polyline;
@@ -125,7 +125,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
                       onPressed: () async {
                         var l = await Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return MapLayerControl(_mapLayers);
+                          return MapLayerControlPage(_mapLayers);
                         }));
                         if (l != null) {
                           setState(() {

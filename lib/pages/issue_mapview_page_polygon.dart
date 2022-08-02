@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/dragmarker.dart';
 import 'package:flutter_map_line_editor/polyeditor.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:lobsta_client/pages/map_layer_control.dart';
+import 'package:lobsta_client/pages/map_layer_control_page.dart';
 
 import '../utils/layer_control_utils.dart';
 
@@ -127,7 +127,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
                       onPressed: () async {
                         var l = await Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
-                          return MapLayerControl(_mapLayers);
+                          return MapLayerControlPage(_mapLayers);
                         }));
                         if (l != null) {
                           setState(() {

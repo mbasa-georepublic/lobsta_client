@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../utils/layer_control_utils.dart';
 
-class MapLayerControl extends StatefulWidget {
+class MapLayerControlPage extends StatefulWidget {
   final List<MapLayer> _mapLayers;
 
-  const MapLayerControl(this._mapLayers, {Key? key}) : super(key: key);
+  const MapLayerControlPage(this._mapLayers, {Key? key}) : super(key: key);
 
   @override
-  MapLayerControlState createState() => MapLayerControlState();
+  MapLayerControlPageState createState() => MapLayerControlPageState();
 }
 
-class MapLayerControlState extends State<MapLayerControl> {
+class MapLayerControlPageState extends State<MapLayerControlPage> {
   final List<bool> _visible = [];
   final List<double> _opacity = [];
   int _baseLayer = -1;
