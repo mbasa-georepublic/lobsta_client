@@ -119,6 +119,7 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
                         if (l != null) {
                           setState(() {
                             _mapLayers = l;
+                            LayerControlUtils.setModifiedLayerList(l);
                           });
                         }
                       },

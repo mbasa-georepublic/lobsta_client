@@ -54,7 +54,19 @@ class MapLayer {
 }
 
 class LayerControlUtils {
+  static List<MapLayer> _modifiedMapLayerList = [];
+
+  static List<MapLayer> get modifiedMapLayerList => _modifiedMapLayerList;
+
+  static void setModifiedLayerList(List<MapLayer> val) {
+    _modifiedMapLayerList = val;
+  }
+
   static List<MapLayer> createMapLayerList() {
+    if (modifiedMapLayerList.isNotEmpty) {
+      return (modifiedMapLayerList);
+    }
+
     List<MapLayer> _mapLayers = [];
 
     MapLayer mapLayer = MapLayer.xyz(
