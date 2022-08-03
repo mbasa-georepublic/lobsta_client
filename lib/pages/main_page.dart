@@ -7,6 +7,7 @@ import 'package:lobsta_client/pages/profile_page.dart';
 import 'package:lobsta_client/pages/project_page.dart';
 import 'package:lobsta_client/pages/switch_account_page.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
+import 'package:lobsta_client/utils/layer_control_utils.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -78,6 +79,7 @@ class MainPageState extends State<MainPage> {
 
   Future<List<Widget>> buildMyTasks() async {
     List<Widget> retVal = [];
+    LayerControlUtils.modifiedMapLayerList = [];
 
     String url = _userCred["url"].toString();
     String apiToken = _userCred["redmine_token"].toString();
@@ -211,8 +213,6 @@ class MainPageState extends State<MainPage> {
         semanticsValue: "Waiting",
       ),
     );
-
-    debugPrint("DisableNavBar : $_diableNavBar  IsLoaded: $_isLoaded");
 
     return Scaffold(
       body: Scaffold(

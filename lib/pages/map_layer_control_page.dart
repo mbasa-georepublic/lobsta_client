@@ -108,42 +108,68 @@ class MapLayerControlPageState extends State<MapLayerControlPage> {
       }
     }
 
-    combinedWidgets = [
-          const Text(
-            "Overlay Layers",
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-        ] +
-        overlayLayerWidgets +
-        [
-          const SizedBox(
-            height: 10,
-          ),
-          const Text(
-            "Base Layers",
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-        ] +
-        baseLayerWidgets +
-        [
-          const SizedBox(
-            height: 10,
-          ),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                returnMapLayers();
-              },
-              child: const Text("Set Layers"),
+    if (overlayLayerWidgets.isNotEmpty) {
+      combinedWidgets = [
+            const Text(
+              "Overlay Layers",
+              style: TextStyle(fontSize: 18),
             ),
-          )
-        ];
+            const SizedBox(
+              height: 10,
+            ),
+          ] +
+          overlayLayerWidgets +
+          [
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              "Base Layers",
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ] +
+          baseLayerWidgets +
+          [
+            const SizedBox(
+              height: 10,
+            ),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  returnMapLayers();
+                },
+                child: const Text("Set Layers"),
+              ),
+            )
+          ];
+    } else {
+      combinedWidgets = [
+            const Text(
+              "Base Layers",
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ] +
+          baseLayerWidgets +
+          [
+            const SizedBox(
+              height: 10,
+            ),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  returnMapLayers();
+                },
+                child: const Text("Set Layers"),
+              ),
+            )
+          ];
+    }
 
     return Scaffold(
       appBar: AppBar(

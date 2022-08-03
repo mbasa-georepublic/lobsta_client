@@ -130,7 +130,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
                         if (l != null) {
                           setState(() {
                             _mapLayers = l;
-                            LayerControlUtils.setModifiedLayerList(l);
+                            LayerControlUtils.modifiedMapLayerList = l;
                           });
                         }
                       },

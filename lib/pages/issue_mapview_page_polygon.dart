@@ -132,7 +132,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
                         if (l != null) {
                           setState(() {
                             _mapLayers = l;
-                            LayerControlUtils.setModifiedLayerList(l);
+                            LayerControlUtils.modifiedMapLayerList = l;
                           });
                         }
                       },

@@ -4,6 +4,7 @@ import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/issue_entry_page.dart';
 import 'package:lobsta_client/pages/issue_info_page.dart';
 import 'package:lobsta_client/pages/project_info_page.dart';
+import 'package:lobsta_client/utils/layer_control_utils.dart';
 
 class ProjectPage extends StatefulWidget {
   final int projectId;
@@ -69,6 +70,24 @@ class ProjectPageState extends State<ProjectPage> {
     if (url.isNotEmpty && apiToken.isNotEmpty) {
       List<Map<String, dynamic>> issues = await NetworkHelper.getProjectIssues(
           url, apiToken, _projectId, issueStatus);
+
+      Map<String, dynamic> projectInfo =
+          await NetworkHelper.getProject(url, apiToken, _projectId);
+
+      if (projectInfo["gttLayer"] != null) {
+        List<dynamic> gttLayers = projectInfo["gttLayer"];
+
+        if (gttLayers.isNotEmpty) {
+          LayerControlUtils.configureGttLayers(
+              gttLayers.map((e) => e as Map<String, dynamic>).toList());
+        } else {
+          LayerControlUtils.modifiedMapLayerList = [];
+          debugPrint("gttLayer is empty");
+        }
+      } else {
+        debugPrint("gttLayer is null");
+        LayerControlUtils.modifiedMapLayerList = [];
+      }
 
       if (issues.isNotEmpty) {
         for (var issue in issues) {
