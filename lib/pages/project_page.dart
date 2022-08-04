@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/issue_entry_page.dart';
@@ -71,6 +73,9 @@ class ProjectPageState extends State<ProjectPage> {
       List<Map<String, dynamic>> issues = await NetworkHelper.getProjectIssues(
           url, apiToken, _projectId, issueStatus);
 
+      /**
+       * Getting GTT Layer List and Polygon Outline
+       */
       Map<String, dynamic> projectInfo =
           await NetworkHelper.getProject(url, apiToken, _projectId);
 
@@ -88,6 +93,38 @@ class ProjectPageState extends State<ProjectPage> {
         debugPrint("gttLayer is null");
         LayerControlUtils.modifiedMapLayerList = [];
       }
+
+      /**
+       * Project Polygon Boundary
+       */
+      LayerControlUtils.gttBndPoly = Polygon(points: []);
+      try {
+        Map<String, dynamic>? geoJson = projectInfo["geojson"];
+
+        if (geoJson != null) {
+          Map<String, dynamic> geom = geoJson["geometry"];
+          String geoType = geom["type"];
+          List<LatLng> pts = [];
+
+          if (geoType.toLowerCase().compareTo("multipolygon") == 0) {
+            for (List pt in geom["coordinates"][0][0]) {
+              pts.add(LatLng(pt[1], pt[0]));
+            }
+          } else if (geoType.toLowerCase().compareTo("polygon") == 0) {
+            for (List pt in geom["coordinates"][0]) {
+              pts.add(LatLng(pt[1], pt[0]));
+            }
+          }
+
+          if (pts.isNotEmpty) {
+            LayerControlUtils.createGttBndPoly(pts);
+          }
+        }
+      } catch (e) {
+        debugPrint("geoJson processing problem: ${e.toString()}");
+      }
+
+      /** x **/
 
       if (issues.isNotEmpty) {
         for (var issue in issues) {

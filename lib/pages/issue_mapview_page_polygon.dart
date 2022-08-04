@@ -94,6 +94,10 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     List<LayerOptions> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
+    if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
+      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+    }
+
     layers.add(PolygonLayerOptions(
       polygonCulling: false,
       polygons: [_polygon],

@@ -89,6 +89,10 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
     List<LayerOptions> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
+    if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
+      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+    }
+
     layers.add(
       PolylineLayerOptions(
         polylineCulling: false,

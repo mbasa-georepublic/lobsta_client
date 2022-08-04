@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class MapLayer {
   int _id = DateTime.now().microsecondsSinceEpoch;
@@ -55,7 +57,11 @@ class MapLayer {
 }
 
 class LayerControlUtils {
+  static Polygon _gttBndPoly = Polygon(points: []);
   static List<MapLayer> _modifiedMapLayerList = [];
+
+  static Polygon get gttBndPoly => _gttBndPoly;
+  static set gttBndPoly(val) => _gttBndPoly = val;
 
   static List<MapLayer> get modifiedMapLayerList => _modifiedMapLayerList;
   static set modifiedMapLayerList(List<MapLayer> val) =>
@@ -65,6 +71,25 @@ class LayerControlUtils {
     _modifiedMapLayerList = val;
   }
 */
+
+  static void createGttBndPoly(List<LatLng> pts) {
+    Polygon polygon = Polygon(
+        points: [
+          LatLng(90, -180),
+          LatLng(-90, -180),
+          LatLng(-90, 180),
+          LatLng(90, 180),
+          LatLng(90, -180)
+        ],
+        holePointsList: [
+          pts
+        ],
+        color: Colors.grey.withOpacity(0.3),
+        borderStrokeWidth: 4.0,
+        borderColor: Colors.deepPurple);
+
+    LayerControlUtils.gttBndPoly = polygon;
+  }
 
   static void configureGttLayers(List<dynamic> gttLayers) {
     if (gttLayers.isNotEmpty) {

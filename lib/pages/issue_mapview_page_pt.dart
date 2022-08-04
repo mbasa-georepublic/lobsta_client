@@ -84,6 +84,10 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
     List<LayerOptions> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
+    if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
+      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+    }
+
     layers.add(
       MarkerLayerOptions(
         markers: _markers,
