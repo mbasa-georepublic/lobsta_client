@@ -123,14 +123,15 @@ class LayerControlUtils {
             }
           }
 
-          MapLayer ml = MapLayer.wms(
-              gtt["name"],
-              gtt["options"]["url"],
-              "WMS",
-              0.5,
-              gtt["baselayer"],
-              isVisible,
-              wmsLayers, {}); //gtt["options"]["params"]);
+          Map<String, String> u = {};
+          t.forEach((key, value) {
+            if (key.compareTo("layers") != 0) {
+              u[key] = value.toString();
+            }
+          });
+
+          MapLayer ml = MapLayer.wms(gtt["name"], gtt["options"]["url"], "WMS",
+              0.5, gtt["baselayer"], isVisible, wmsLayers, u);
 
           mapLayers.add(ml);
         } else if (layerType.toUpperCase().contains("XYZ") ||
