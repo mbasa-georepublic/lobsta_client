@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../utils/layer_control_utils.dart';
+import '../utils/material_icon_utils.dart';
 import 'map_layer_control_page.dart';
 
 class IssueMapViewPagePt extends StatefulWidget {
@@ -34,17 +35,33 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
     _initialPoint = widget._latLng;
     _forEdit = widget.forEdit;
 
+    IconData selIcon = getMaterialIcon(name: "add_alert") ?? Icons.location_on;
+
     _markers.add(
       Marker(
         point: _initialPoint,
         height: 80.0,
         width: 70.0,
-        anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
-        builder: (ctx) => const Icon(
-          Icons.location_on,
-          size: 42,
-          color: Colors.deepOrange,
+        builder: (ctx) => Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            const Icon(
+              Icons.chat_bubble_rounded,
+              size: 42,
+              color: Colors.deepPurple,
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 7.0),
+              //alignment: Alignment.center,
+              child: Icon(
+                selIcon,
+                size: 20,
+                color: Colors.white,
+              ),
+            )
+          ],
         ),
+        anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
       ),
     );
     _mapOptions = MapOptions(

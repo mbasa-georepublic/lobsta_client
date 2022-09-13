@@ -8,6 +8,7 @@ import 'package:lobsta_client/pages/project_page.dart';
 import 'package:lobsta_client/pages/switch_account_page.dart';
 import 'package:lobsta_client/utils/dialog_utils.dart';
 import 'package:lobsta_client/utils/layer_control_utils.dart';
+import 'package:lobsta_client/utils/tracker_icons_utils.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -34,6 +35,11 @@ class MainPageState extends State<MainPage> {
 
   void initScreen() async {
     _userCred = await _dbh.getUserCredential();
+
+    String url = _userCred["url"].toString();
+    String userToken = _userCred["redmine_token"].toString();
+
+    await TrackerIconsUtils.getSaveTrackerIcons(url, userToken);
     await buildMainWidget();
 
     setState(() {

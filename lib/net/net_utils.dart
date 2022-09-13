@@ -37,6 +37,36 @@ class NetworkHelper {
     return retVal;
   }
 
+  static Future<Map<String, dynamic>> getTrackerIcons(
+      String mUrl, String apiKey) async {
+    Map<String, dynamic> retVal = {};
+
+    String url = "$mUrl/gtt/settings.json";
+
+    try {
+      Dio dio = Dio();
+
+      Response response = await dio.get(
+        url,
+        options: Options(
+          headers: {
+            "X-Redmine-API-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Msg: ${response.statusMessage} ");
+
+        retVal = response.data["gttDefaultSetting"];
+      }
+    } on DioError catch (exception) {
+      debugPrint("GTT Settings Error: ${exception.message}");
+    }
+    return retVal;
+  }
+
   static Future<Map<String, dynamic>> getProject(
       String mUrl, String apiKey, int projectId) async {
     Map<String, dynamic> retVal = {};

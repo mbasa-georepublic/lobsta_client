@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -165,6 +164,27 @@ class LayerControlUtils {
         true,
         true,
         ['a', 'b', 'c']);
+
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.xyz(
+        "Google",
+        "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+        "xyz",
+        1.0,
+        true,
+        false,
+        ['mt0', 'mt1', 'mt2', 'mt3']);
+
+    _mapLayers.add(mapLayer);
+
+    mapLayer = MapLayer.xyz(
+        "Google Satellite Hybrid ",
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        "xyz",
+        1.0,
+        true,
+        false, []);
 
     _mapLayers.add(mapLayer);
     return _mapLayers;

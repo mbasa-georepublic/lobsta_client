@@ -11,10 +11,15 @@ class DatabaseHelper {
 
   DatabaseHelper.internal();
 
-  static Database? _db;
+  static late Database _db;
+  static bool _isInitialized = false;
 
-  Future<Database?> get _dataBase async {
-    _db ??= await _initDb();
+  Future<Database> get _dataBase async {
+    if (!_isInitialized) {
+      _db = await _initDb();
+      _isInitialized = true;
+    }
+
     return _db;
   }
 
@@ -33,7 +38,7 @@ class DatabaseHelper {
     debugPrint("InitDB: Using DB in $path");
 
     var tDb = await openDatabase(path,
-        version: 2,
+        version: 3,
         readOnly: false,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade);
@@ -42,10 +47,13 @@ class DatabaseHelper {
   }
 
   void _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    debugPrint("Updating Database Tables");
+    debugPrint("** Updating Database Tables $oldVersion $newVersion **");
 
-    Map<String, List<String>> updateSql = {
-      "2": [
+    /*
+    Map<String, List<String>> updateSql = <String, List<String>>{};
+     */
+    Map<int, List<String>> updateSql = {
+      2: [
         "ALTER TABLE user_credential ADD COLUMN last_name TEXT;",
         "ALTER TABLE user_credential ADD COLUMN first_name TEXT;",
         "CREATE TABLE logged_credentials("
@@ -57,17 +65,19 @@ class DatabaseHelper {
             "redmine_token TEXT,"
             "PRIMARY KEY(username,url) );",
       ],
+      3: ["CREATE TABLE tracker_icons(tracker_id INT PRIMARY KEY,icon TEXT);"],
     };
 
-    for (int i = oldVersion + 1; i <= newVersion; i++) {
-      try {
-        if (updateSql[i.toString()]!.isNotEmpty) {
-          for (String st in updateSql[i.toString()]!) {
+    for (int i = 1; i <= newVersion; i++) {
+      if (updateSql.containsKey(i)) {
+        for (String st in updateSql[i] ?? []) {
+          debugPrint(st);
+          try {
             await db.execute(st);
+          } catch (e) {
+            debugPrint("Update Error: ${e.toString()}");
           }
         }
-      } catch (e) {
-        debugPrint("ALTER Table: ${e.toString()}");
       }
     }
   }
@@ -91,11 +101,34 @@ class DatabaseHelper {
         "first_name TEXT,"
         "redmine_token TEXT,"
         "PRIMARY KEY(username,url) );");
+
+    await db.execute("CREATE TABLE tracker_icons("
+        "tracker_id INT PRIMARY KEY,icon TEXT);");
+  }
+
+  Future<int> insertTrackerIcon(int id, String iconName) async {
+    var db = await _dataBase;
+    int retVal = 0;
+    Map<String, dynamic> rec = {"id": id, "icon": iconName};
+
+    try {
+      retVal = await db.insert("tracker_icons", rec);
+    } catch (e) {
+      debugPrint("Tracker Icon: ${e.toString()}");
+    }
+
+    return retVal;
+  }
+
+  Future<int> deleteTrackerIcons() async {
+    var db = await _dataBase;
+
+    return db.delete("tracker_icons");
   }
 
   Future<int> deleteUserCredential() async {
     var db = await _dataBase;
-    return await db!.delete("user_credential");
+    return await db.delete("user_credential");
   }
 
   Future<int> insertUserCredential(
@@ -119,14 +152,14 @@ class DatabaseHelper {
     };
 
     if (insertLog) {
-      await db!.insert(
+      await db.insert(
         "logged_credentials",
         tabData,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
 
-    return await db!.insert(
+    return await db.insert(
       "user_credential",
       tabData,
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -137,7 +170,7 @@ class DatabaseHelper {
     String retVal = "";
 
     var db = await _dataBase;
-    var res = await db!.query("user_credential", limit: 1);
+    var res = await db.query("user_credential", limit: 1);
 
     if (res.isNotEmpty) {
       retVal = res[0]["redmine_token"].toString();
@@ -150,7 +183,7 @@ class DatabaseHelper {
     Map<String, Object?> retVal = {};
 
     var db = await _dataBase;
-    var res = await db!.query("user_credential", limit: 1);
+    var res = await db.query("user_credential", limit: 1);
 
     if (res.isNotEmpty) {
       retVal = res[0];
@@ -163,7 +196,7 @@ class DatabaseHelper {
     List<Map<String, Object?>> retVal = [];
 
     var db = await _dataBase;
-    var res = await db!.query("logged_credentials",
+    var res = await db.query("logged_credentials",
         where: "username || url not in "
             "(select username || url from user_credential)");
 
@@ -176,7 +209,7 @@ class DatabaseHelper {
 
   Future<int> deleteLoggedCredential(String username, String url) async {
     var db = await _dataBase;
-    return await db!.delete("logged_credentials",
+    return await db.delete("logged_credentials",
         where: "username = ? and url = ?", whereArgs: [username, url]);
   }
 }
