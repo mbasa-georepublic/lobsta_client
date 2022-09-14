@@ -57,6 +57,9 @@ class IssueEditPageState extends State<IssueEditPage> {
 
   double _spentHours = 0.0;
 
+  String _statusColor = "";
+  String _trackerIcon = "";
+
   LatLng _latLng = LatLng(0, 0);
   Polygon _polygon = Polygon(points: []);
   Polyline _polyline = Polyline(points: []);
@@ -230,6 +233,16 @@ class IssueEditPageState extends State<IssueEditPage> {
       } catch (e) {
         debugPrint("Location Error: ${e.toString()}");
       }
+    }
+
+    try {
+      int t = _issue["tracker"]["id"] ?? 0;
+      int s = _issue["status"]["id"] ?? 0;
+
+      _trackerIcon = await _dbh.getTrackerIcon(t);
+      _statusColor = await _dbh.getStatusColor(s);
+    } catch (e) {
+      debugPrint("Error in getting tracker and status info: ${e.toString()}");
     }
 
     setState(() {
@@ -585,7 +598,9 @@ class IssueEditPageState extends State<IssueEditPage> {
                                         var l = await Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) {
-                                            return IssueMapViewPagePt(_latLng);
+                                            return IssueMapViewPagePt(_latLng,
+                                                iconColor: _statusColor,
+                                                iconName: _trackerIcon);
                                           }),
                                         );
                                         if (l != null) {

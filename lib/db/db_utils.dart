@@ -65,7 +65,10 @@ class DatabaseHelper {
             "redmine_token TEXT,"
             "PRIMARY KEY(username,url) );",
       ],
-      3: ["CREATE TABLE tracker_icons(tracker_id INT PRIMARY KEY,icon TEXT);"],
+      3: [
+        "CREATE TABLE tracker_icons(id INT PRIMARY KEY,icon TEXT);",
+        "CREATE TABLE status_colors(id INT PRIMARY KEY,color TEXT);"
+      ],
     };
 
     for (int i = 1; i <= newVersion; i++) {
@@ -103,7 +106,10 @@ class DatabaseHelper {
         "PRIMARY KEY(username,url) );");
 
     await db.execute("CREATE TABLE tracker_icons("
-        "tracker_id INT PRIMARY KEY,icon TEXT);");
+        "id INT PRIMARY KEY,icon TEXT);");
+
+    await db.execute("CREATE TABLE status_colors("
+        "id INT PRIMARY KEY,color TEXT);");
   }
 
   Future<int> insertTrackerIcon(int id, String iconName) async {
@@ -124,6 +130,26 @@ class DatabaseHelper {
     var db = await _dataBase;
 
     return db.delete("tracker_icons");
+  }
+
+  Future<int> insertStatusColors(int id, String color) async {
+    var db = await _dataBase;
+    int retVal = 0;
+    Map<String, dynamic> rec = {"id": id, "color": color};
+
+    try {
+      retVal = await db.insert("status_colors", rec);
+    } catch (e) {
+      debugPrint("Status Colors: ${e.toString()}");
+    }
+
+    return retVal;
+  }
+
+  Future<int> deleteStatusColors() async {
+    var db = await _dataBase;
+
+    return db.delete("status_colors");
   }
 
   Future<int> deleteUserCredential() async {
@@ -164,6 +190,42 @@ class DatabaseHelper {
       tabData,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<String> getTrackerIcon(int id) async {
+    String retVal = "location_on";
+    var db = await _dataBase;
+
+    try {
+      var res = await db.query("tracker_icons",
+          columns: ["icon"], where: "id = $id", limit: 1);
+
+      if (res[0]["icon"].toString().isNotEmpty) {
+        retVal = res[0]["icon"].toString();
+      }
+    } catch (e) {
+      debugPrint("Error in TrackerIcon Query: ${e.toString()}");
+    }
+
+    return retVal;
+  }
+
+  Future<String> getStatusColor(int id) async {
+    String retVal = "#5c77ff";
+    var db = await _dataBase;
+
+    try {
+      var res = await db.query("status_colors",
+          columns: ["color"], where: "id = $id", limit: 1);
+
+      if (res[0]["color"].toString().isNotEmpty) {
+        retVal = res[0]["color"].toString();
+      }
+    } catch (e) {
+      debugPrint("Error in StatusColor Query: ${e.toString()}");
+    }
+
+    return retVal;
   }
 
   Future<String> getUserToken() async {

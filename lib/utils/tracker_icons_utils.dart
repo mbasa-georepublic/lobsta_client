@@ -17,6 +17,7 @@ class TrackerIconsUtils {
 
       if (res.containsKey("defaultTrackerIcon")) {
         List<dynamic> tokens = res["defaultTrackerIcon"] ?? [];
+        List<dynamic> statusColors = res["defaultStatusColor"] ?? [];
 
         if (tokens.isNotEmpty) {
           await dbh.deleteTrackerIcons();
@@ -26,6 +27,18 @@ class TrackerIconsUtils {
                 token["trackerID"], token["icon"]?.toString() ?? "");
 
             debugPrint("TokenID: ${token["trackerID"]} icon: ${token["icon"]}");
+          }
+        }
+
+        if (statusColors.isNotEmpty) {
+          await dbh.deleteStatusColors();
+
+          for (Map<String, dynamic> statusColor in statusColors) {
+            await dbh.insertStatusColors(statusColor["statusID"],
+                statusColor["color"]?.toString() ?? "#5c77ff");
+
+            debugPrint("Status ID: ${statusColor["statusID"]} "
+                "Color: ${statusColor["color"]}");
           }
         }
       }

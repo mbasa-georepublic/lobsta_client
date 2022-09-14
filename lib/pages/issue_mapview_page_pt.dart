@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lobsta_client/utils/color_utils.dart';
 
 import '../utils/layer_control_utils.dart';
 import '../utils/material_icon_utils.dart';
@@ -9,8 +10,11 @@ import 'map_layer_control_page.dart';
 class IssueMapViewPagePt extends StatefulWidget {
   final LatLng _latLng;
   final bool forEdit;
+  final String iconName;
+  final String iconColor;
 
-  const IssueMapViewPagePt(this._latLng, {this.forEdit = true, Key? key})
+  const IssueMapViewPagePt(this._latLng,
+      {this.forEdit = true, this.iconName = "", this.iconColor = "", Key? key})
       : super(key: key);
 
   @override
@@ -26,16 +30,26 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
   bool _isFirst = true;
   bool _forEdit = true;
 
+  String _iconColor = "#000000";
+  String _iconName = "location_on";
+  IconData _selIcon = Icons.location_on;
   List<MapLayer> _mapLayers = LayerControlUtils.createMapLayerList();
 
   @override
   void initState() {
     super.initState();
 
+    if (widget.iconColor.isNotEmpty) {
+      _iconColor = widget.iconColor;
+    }
+    if (widget.iconName.isNotEmpty) {
+      _iconName = widget.iconName;
+    }
+
     _initialPoint = widget._latLng;
     _forEdit = widget.forEdit;
 
-    IconData selIcon = getMaterialIcon(name: "add_alert") ?? Icons.location_on;
+    _selIcon = getMaterialIcon(name: _iconName) ?? Icons.location_on;
 
     _markers.add(
       Marker(
@@ -45,16 +59,16 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
         builder: (ctx) => Stack(
           alignment: Alignment.topCenter,
           children: [
-            const Icon(
+            Icon(
               Icons.chat_bubble_rounded,
               size: 42,
-              color: Colors.deepPurple,
+              color: HexColor(_iconColor), //Colors.deepPurple,
             ),
             Container(
               padding: const EdgeInsets.only(top: 7.0),
               //alignment: Alignment.center,
               child: Icon(
-                selIcon,
+                _selIcon,
                 size: 20,
                 color: Colors.white,
               ),
@@ -83,10 +97,24 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
           height: 80.0,
           width: 70.0,
           anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
-          builder: (ctx) => const Icon(
-            Icons.location_on,
-            size: 42,
-            color: Colors.deepOrange,
+          builder: (ctx) => Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              Icon(
+                Icons.chat_bubble_rounded,
+                size: 42,
+                color: HexColor(_iconColor), //Colors.deepPurple,
+              ),
+              Container(
+                padding: const EdgeInsets.only(top: 7.0),
+                //alignment: Alignment.center,
+                child: Icon(
+                  _selIcon,
+                  size: 20,
+                  color: Colors.white,
+                ),
+              )
+            ],
           ),
         ),
       );

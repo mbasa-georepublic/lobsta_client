@@ -27,6 +27,8 @@ class IssueInfoPageState extends State<IssueInfoPage> {
 
   String _url = "";
   String _apiToken = "";
+  String _statusColor = "";
+  String _trackerIcon = "";
   int _issueId = -1;
 
   LatLng _latLng = LatLng(0.0, 0.0);
@@ -91,6 +93,16 @@ class IssueInfoPageState extends State<IssueInfoPage> {
       }
     }
 
+    try {
+      int t = _issue["tracker"]["id"] ?? 0;
+      int s = _issue["status"]["id"] ?? 0;
+
+      _trackerIcon = await _dbh.getTrackerIcon(t);
+      _statusColor = await _dbh.getStatusColor(s);
+    } catch (e) {
+      debugPrint("Error in getting tracker and status info: ${e.toString()}");
+    }
+
     setState(() {});
   }
 
@@ -144,6 +156,8 @@ class IssueInfoPageState extends State<IssueInfoPage> {
                               )
                             : IssueMapViewPagePt(
                                 _latLng,
+                                iconColor: _statusColor,
+                                iconName: _trackerIcon,
                                 forEdit: false,
                               );
                   }),

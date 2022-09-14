@@ -45,6 +45,7 @@ dependencies:
   flutter_map_line_editor: ^2.0.0
   flutter_map_dragmarker: ^2.0.0
   flutter_cached_pdfview: ^0.4.1
+  #icons_helper: ^1.0.4
 
 dev_dependencies:
   flutter_test:
