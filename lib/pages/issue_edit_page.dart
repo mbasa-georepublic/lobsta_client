@@ -137,8 +137,10 @@ class IssueEditPageState extends State<IssueEditPage> {
       _apiKey = r["redmine_token"].toString();
     }
 
-    var trackers = await NetworkHelper.getTrackers(_mUrl, _apiKey);
+    //var trackers = await NetworkHelper.getTrackers(_mUrl, _apiKey);
     var issueStatus = await NetworkHelper.getIssueStatus(_mUrl, _apiKey);
+
+    var project = await NetworkHelper.getProject(_mUrl, _apiKey, _projectId);
     var timeActivities =
         await NetworkHelper.getTimeEntryActivities(_mUrl, _apiKey);
     var members =
@@ -187,7 +189,7 @@ class IssueEditPageState extends State<IssueEditPage> {
       );
     }
 
-    for (Map<String, dynamic> t in trackers) {
+    for (Map<String, dynamic> t in project["trackers"]) {
       _trackers.add(
         DropdownMenuItem(
           child: Text(t["name"].toString()),
