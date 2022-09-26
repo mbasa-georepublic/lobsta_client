@@ -79,8 +79,8 @@ class ProjectPageState extends State<ProjectPage> {
       Map<String, dynamic> projectInfo =
           await NetworkHelper.getProject(url, apiToken, _projectId);
 
-      if (projectInfo["gttLayer"] != null) {
-        List<dynamic> gttLayers = projectInfo["gttLayer"];
+      if (projectInfo["layers"] != null) {
+        List<dynamic> gttLayers = projectInfo["layers"];
 
         if (gttLayers.isNotEmpty) {
           LayerControlUtils.configureGttLayers(

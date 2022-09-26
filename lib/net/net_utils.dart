@@ -72,7 +72,7 @@ class NetworkHelper {
     Map<String, dynamic> retVal = {};
 
     String url = "$mUrl/projects/$projectId.json?include="
-        "trackers,issue_categories,enabled_modules";
+        "trackers,issue_categories,enabled_modules,layers";
 
     try {
       Dio dio = Dio();
