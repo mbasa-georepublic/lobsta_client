@@ -103,7 +103,8 @@ class NetworkHelper {
       String mUrl, String apiKey) async {
     List<Map<String, dynamic>> retVal = [];
 
-    String url = "$mUrl/projects.json?limit=100000000&include=enabled_modules";
+    String url = "$mUrl/projects.json?limit=100000000&include="
+        "enabled_modules,layers,geometry";
 
     try {
       Dio dio = Dio();

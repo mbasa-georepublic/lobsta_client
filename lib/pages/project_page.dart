@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/issue_entry_page.dart';
@@ -11,8 +10,12 @@ import 'package:lobsta_client/utils/layer_control_utils.dart';
 class ProjectPage extends StatefulWidget {
   final int projectId;
   final String projectTitle;
+  final List<dynamic> projectLayers;
+  final Map<String, dynamic> projectBnd;
 
-  const ProjectPage(this.projectId, this.projectTitle, {Key? key})
+  const ProjectPage(
+      this.projectId, this.projectTitle, this.projectLayers, this.projectBnd,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -76,21 +79,17 @@ class ProjectPageState extends State<ProjectPage> {
       /**
        * Getting GTT Layer List and Polygon Outline
        */
-      Map<String, dynamic> projectInfo =
-          await NetworkHelper.getProject(url, apiToken, _projectId);
 
-      if (projectInfo["layers"] != null) {
-        List<dynamic> gttLayers = projectInfo["layers"];
+      //Map<String, dynamic> projectInfo =
+      //    await NetworkHelper.getProject(url, apiToken, _projectId);
 
-        if (gttLayers.isNotEmpty) {
-          LayerControlUtils.configureGttLayers(
-              gttLayers.map((e) => e as Map<String, dynamic>).toList());
-        } else {
-          LayerControlUtils.modifiedMapLayerList = [];
-          debugPrint("gttLayer is empty");
-        }
+      if (widget.projectLayers.isNotEmpty) {
+        List<dynamic> gttLayers = widget.projectLayers;
+
+        LayerControlUtils.configureGttLayers(
+            gttLayers.map((e) => e as Map<String, dynamic>).toList());
       } else {
-        debugPrint("gttLayer is null");
+        debugPrint("gttLayers is empty");
         LayerControlUtils.modifiedMapLayerList = [];
       }
 
@@ -99,32 +98,14 @@ class ProjectPageState extends State<ProjectPage> {
        */
       LayerControlUtils.gttBndPoly = Polygon(points: []);
       try {
-        Map<String, dynamic>? geoJson = projectInfo["geojson"];
+        Map<String, dynamic> projBndPoly = widget.projectBnd;
 
-        if (geoJson != null) {
-          Map<String, dynamic> geom = geoJson["geometry"];
-          String geoType = geom["type"];
-          List<LatLng> pts = [];
-
-          if (geoType.toLowerCase().compareTo("multipolygon") == 0) {
-            for (List pt in geom["coordinates"][0][0]) {
-              pts.add(LatLng(pt[1], pt[0]));
-            }
-          } else if (geoType.toLowerCase().compareTo("polygon") == 0) {
-            for (List pt in geom["coordinates"][0]) {
-              pts.add(LatLng(pt[1], pt[0]));
-            }
-          }
-
-          if (pts.isNotEmpty) {
-            LayerControlUtils.createGttBndPoly(pts);
-          }
+        if (projBndPoly.isNotEmpty) {
+          LayerControlUtils.configureGttBndPoly(projBndPoly);
         }
       } catch (e) {
         debugPrint("geoJson processing problem: ${e.toString()}");
       }
-
-      /** x **/
 
       if (issues.isNotEmpty) {
         for (var issue in issues) {

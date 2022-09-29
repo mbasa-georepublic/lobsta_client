@@ -90,6 +90,30 @@ class LayerControlUtils {
     LayerControlUtils.gttBndPoly = polygon;
   }
 
+  static void configureGttBndPoly(Map<String, dynamic> geoJson) {
+    try {
+      Map<String, dynamic> geom = geoJson["geometry"];
+      String geoType = geom["type"];
+      List<LatLng> pts = [];
+
+      if (geoType.toLowerCase().compareTo("multipolygon") == 0) {
+        for (List pt in geom["coordinates"][0][0]) {
+          pts.add(LatLng(pt[1], pt[0]));
+        }
+      } else if (geoType.toLowerCase().compareTo("polygon") == 0) {
+        for (List pt in geom["coordinates"][0]) {
+          pts.add(LatLng(pt[1], pt[0]));
+        }
+      }
+
+      if (pts.isNotEmpty) {
+        LayerControlUtils.createGttBndPoly(pts);
+      }
+    } catch (e) {
+      debugPrint("geoJson processing problem: ${e.toString()}");
+    }
+  }
+
   static void configureGttLayers(List<dynamic> gttLayers) {
     if (gttLayers.isNotEmpty) {
       modifiedMapLayerList = [];

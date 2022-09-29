@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:lobsta_client/db/db_utils.dart';
 import 'package:lobsta_client/net/net_utils.dart';
 import 'package:lobsta_client/pages/issue_info_page.dart';
@@ -94,11 +95,15 @@ class MainPageState extends State<MainPage> {
       List<Map<String, dynamic>> issues =
           await NetworkHelper.getMyTasks(url, apiToken);
 
+      List<Map<String, dynamic>> projects =
+          await NetworkHelper.getUserProjects(url, apiToken);
+
       if (issues.isNotEmpty) {
         for (var p in issues) {
           int id = p["id"];
           String subject = p["subject"].toString();
-          String desc = p["project"]?["name"];
+          String desc = p["project"]?["name"] ?? "";
+          int projId = p["project"]?["id"] ?? -99;
 
           retVal.add(
             ListTile(
@@ -110,6 +115,43 @@ class MainPageState extends State<MainPage> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) {
+                    debugPrint("Project ID: $projId");
+                    /**
+                     * Traversing Projects List
+                     */
+                    for (Map<String, dynamic> project in projects) {
+                      if (projId == project["id"]) {
+                        List<dynamic> projLayers = project["layers"] ?? [];
+
+                        LayerControlUtils.modifiedMapLayerList = [];
+                        LayerControlUtils.gttBndPoly = Polygon(points: []);
+
+                        /**
+                         * Setting Map Layers
+                         */
+                        if (projLayers.isNotEmpty) {
+                          LayerControlUtils.configureGttLayers(projLayers
+                              .map((e) => e as Map<String, dynamic>)
+                              .toList());
+                        }
+
+                        /**
+                         * Setting Project Boundary Polygon
+                         */
+
+                        try {
+                          Map<String, dynamic> projBndPoly = p["gttBnd"] ?? {};
+
+                          if (projBndPoly.isNotEmpty) {
+                            LayerControlUtils.configureGttBndPoly(projBndPoly);
+                          }
+                        } catch (e) {
+                          debugPrint(
+                              "geoJson processing problem: ${e.toString()}");
+                        }
+                        break;
+                      }
+                    }
                     return IssueInfoPage(id);
                   }),
                 );
@@ -137,6 +179,8 @@ class MainPageState extends State<MainPage> {
         for (var p in projects) {
           int id = p["id"];
           String projName = p["name"].toString();
+          List<dynamic> projLayers = p["layers"] ?? [];
+          Map<String, dynamic> projBndPoly = p["gttBnd"] ?? {};
 
           retVal.add(ListTile(
             title: Text(projName),
@@ -146,7 +190,7 @@ class MainPageState extends State<MainPage> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) {
-                return ProjectPage(id, projName);
+                return ProjectPage(id, projName, projLayers, projBndPoly);
               }),
             ),
           ));
