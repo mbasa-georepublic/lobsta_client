@@ -52,7 +52,8 @@ class DialogUtil {
                 btnMsg,
                 style: const TextStyle(color: Colors.white),
               ),
-              style: ElevatedButton.styleFrom(primary: const Color(0xff00ac7d)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff00ac7d)),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -83,7 +84,7 @@ class DialogUtil {
                 cancelBtnMsg,
                 style: const TextStyle(color: Color(0xff546e7a)),
               ),
-              style: ElevatedButton.styleFrom(primary: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             ElevatedButton(
@@ -91,7 +92,8 @@ class DialogUtil {
                 okBtnMsg,
                 style: const TextStyle(color: Colors.white),
               ),
-              style: ElevatedButton.styleFrom(primary: const Color(0xff00ac7d)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff00ac7d)),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
