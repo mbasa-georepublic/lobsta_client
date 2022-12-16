@@ -140,7 +140,7 @@ class MainPageState extends State<MainPage> {
                          */
 
                         try {
-                          Map<String, dynamic> projBndPoly = p["gttBnd"] ?? {};
+                          Map<String, dynamic> projBndPoly = p["geojson"] ?? {};
 
                           if (projBndPoly.isNotEmpty) {
                             LayerControlUtils.configureGttBndPoly(projBndPoly);
@@ -180,7 +180,7 @@ class MainPageState extends State<MainPage> {
           int id = p["id"];
           String projName = p["name"].toString();
           List<dynamic> projLayers = p["layers"] ?? [];
-          Map<String, dynamic> projBndPoly = p["gttBnd"] ?? {};
+          Map<String, dynamic> projBndPoly = p["geojson"] ?? {};
 
           retVal.add(ListTile(
             title: Text(projName),
