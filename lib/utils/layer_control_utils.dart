@@ -98,7 +98,8 @@ class LayerControlUtils {
 
       if (geoType.toLowerCase().compareTo("multipolygon") == 0) {
         for (List pt in geom["coordinates"][0][0]) {
-          pts.add(LatLng(pt[1], pt[0]));
+          pts.add(LatLng(
+              double.parse(pt[1].toString()), double.parse(pt[0].toString())));
         }
       } else if (geoType.toLowerCase().compareTo("polygon") == 0) {
         for (List pt in geom["coordinates"][0]) {
