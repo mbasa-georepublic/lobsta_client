@@ -140,7 +140,8 @@ class MainPageState extends State<MainPage> {
                          */
 
                         try {
-                          Map<String, dynamic> projBndPoly = p["geojson"] ?? {};
+                          Map<String, dynamic> projBndPoly =
+                              project["geojson"] ?? {};
 
                           if (projBndPoly.isNotEmpty) {
                             LayerControlUtils.configureGttBndPoly(projBndPoly);
