@@ -123,7 +123,7 @@ class LayerControlUtils {
       bool isFirstBaseLayer = true;
 
       for (Map<String, dynamic> gtt in gttLayers) {
-        String layerType = gtt["type"];
+        String layerType = gtt["type"] ?? "";
 
         if (gtt["baselayer"] && isFirstBaseLayer) {
           isVisible = true;
