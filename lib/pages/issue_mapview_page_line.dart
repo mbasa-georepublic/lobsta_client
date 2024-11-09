@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_dragmarker/dragmarker.dart';
-import 'package:flutter_map_line_editor/polyeditor.dart';
+import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
+import 'package:flutter_map_line_editor/flutter_map_line_editor.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../utils/layer_control_utils.dart';
@@ -22,7 +22,7 @@ class IssueMapViewPageLine extends StatefulWidget {
 
 class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
   final MapController _mapController = MapController();
-  MapOptions _mapOptions = MapOptions();
+  MapOptions _mapOptions = const MapOptions();
   Polyline _polyline = Polyline(points: []);
   //LatLng _presentPoint = LatLng(0, 0);
   bool _forEdit = true;
@@ -36,11 +36,11 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
     _polyline = widget._polyline;
     _forEdit = widget.forEdit;
 
-    LatLngBounds bnd = LatLngBounds();
+    late LatLngBounds bnd;
 
     if (_polyline.points.isNotEmpty) {
       bnd = LatLngBounds.fromPoints(_polyline.points);
-      bnd.pad(0.1);
+      //bnd.pad(0.1);bnd.
     } else {
       List<LatLng> t = [widget.centerPt];
       bnd = LatLngBounds.fromPoints(t);
@@ -48,14 +48,14 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
 
     if (_forEdit) {
       _mapOptions = MapOptions(
-        bounds: bnd,
+        initialCameraFit: CameraFit.bounds(bounds: bnd),
         maxZoom: 22.0,
         minZoom: 10.0,
-        zoom: 16.0,
-        allowPanningOnScrollingParent: false,
+        initialZoom: 16.0,
+        /*allowPanningOnScrollingParent: false,
         plugins: [
           DragMarkerPlugin(),
-        ],
+        ],*/
         onTap: (_, ll) {
           _polyEditor.add(_polyline.points, ll);
         },
@@ -63,11 +63,11 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
       );
     } else {
       _mapOptions = MapOptions(
-        bounds: bnd,
+        initialCameraFit: CameraFit.bounds(bounds: bnd),
         maxZoom: 22.0,
         minZoom: 9.0,
-        zoom: 16.0,
-        allowPanningOnScrollingParent: false,
+        initialZoom: 16.0,
+        //allowPanningOnScrollingParent: false,
         onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
       );
     }
@@ -76,33 +76,36 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
       points: _polyline.points,
       pointIcon: const Icon(Icons.crop_square, size: 30),
       intermediateIcon: const Icon(Icons.lens, size: 30, color: Colors.grey),
-      callbackRefresh: () => {setState(() {})},
+      callbackRefresh: (LatLng? _) {
+        //debugPrint("polyedit setstate");
+        setState(() {});
+      },
     );
   }
 
-  _moveMap(MapPosition pos) {
+  _moveMap(MapCamera pos) {
     //_presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
   }
 
   @override
   Widget build(BuildContext context) {
-    List<LayerOptions> layers =
+    List<Widget> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
     if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
-      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+      layers.add(PolygonLayer(polygons: [LayerControlUtils.gttBndPoly]));
     }
 
     layers.add(
-      PolylineLayerOptions(
-        polylineCulling: false,
+      PolylineLayer(
+        //polylineCulling: false,
         polylines: [_polyline],
       ),
     );
     //DragMarkerPluginOptions(markers: _polyEditor.edit()),
 
     if (_forEdit) {
-      layers.add(DragMarkerPluginOptions(markers: _polyEditor.edit()));
+      layers.add(DragMarkers(markers: _polyEditor.edit()));
     }
 
     return Scaffold(
@@ -119,7 +122,7 @@ class IssueMapViewPageLineState extends State<IssueMapViewPageLine> {
                 FlutterMap(
                   options: _mapOptions,
                   mapController: _mapController,
-                  layers: layers,
+                  children: layers,
                 ),
                 Align(
                   alignment: Alignment.topRight,

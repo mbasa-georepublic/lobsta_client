@@ -56,7 +56,7 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
         point: _initialPoint,
         height: 80.0,
         width: 70.0,
-        builder: (ctx) => Stack(
+        child: Stack(
           alignment: Alignment.topCenter,
           children: [
             Icon(
@@ -75,19 +75,19 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
             )
           ],
         ),
-        anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
+        //anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
       ),
     );
     _mapOptions = MapOptions(
-        center: _initialPoint,
+        initialCenter: _initialPoint,
         maxZoom: 18.0,
         minZoom: 9.0,
-        zoom: 16.0,
+        initialZoom: 16.0,
         onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {});
   }
 
-  _moveMap(MapPosition pos) {
-    _presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
+  _moveMap(MapCamera pos) {
+    _presentPoint = LatLng(pos.center.latitude, pos.center.longitude);
 
     if (!_isFirst) {
       _markers.clear();
@@ -96,8 +96,8 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
           point: _presentPoint,
           height: 80.0,
           width: 70.0,
-          anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
-          builder: (ctx) => Stack(
+          //anchorPos: AnchorPos.exactly(Anchor(35.0, 20.0)),
+          child: Stack(
             alignment: Alignment.topCenter,
             children: [
               Icon(
@@ -126,15 +126,15 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
 
   @override
   Widget build(BuildContext context) {
-    List<LayerOptions> layers =
+    List<Widget> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
     if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
-      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+      layers.add(PolygonLayer(polygons: [LayerControlUtils.gttBndPoly]));
     }
 
     layers.add(
-      MarkerLayerOptions(
+      MarkerLayer(
         markers: _markers,
       ),
     );
@@ -153,7 +153,7 @@ class IssueMapViewPagePtState extends State<IssueMapViewPagePt> {
                 FlutterMap(
                   options: _mapOptions,
                   mapController: _mapController,
-                  layers: layers,
+                  children: layers,
                 ),
                 Align(
                   alignment: Alignment.topRight,

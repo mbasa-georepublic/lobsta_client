@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_dragmarker/dragmarker.dart';
-import 'package:flutter_map_line_editor/polyeditor.dart';
+import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
+import 'package:flutter_map_line_editor/flutter_map_line_editor.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lobsta_client/pages/map_layer_control_page.dart';
 
@@ -23,7 +23,7 @@ class IssueMapViewPagePolygon extends StatefulWidget {
 
 class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
   final MapController _mapController = MapController();
-  MapOptions _mapOptions = MapOptions();
+  MapOptions _mapOptions = const MapOptions();
   Polygon _polygon = Polygon(points: []);
   bool _forEdit = true;
 
@@ -37,42 +37,42 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
     _polygon = widget._polygon;
     _forEdit = widget.forEdit;
 
-    LatLngBounds bnd = LatLngBounds();
+    late LatLngBounds bnd;
 
     if (_polygon.points.isNotEmpty) {
       bnd = LatLngBounds.fromPoints(_polygon.points);
-      bnd.pad(0.1);
     } else {
       List<LatLng> l = [widget.centerPt];
+      _polygon = Polygon(points: [widget.centerPt],
+        borderColor: Colors.blueAccent,borderStrokeWidth: 5.0);
       bnd = LatLngBounds.fromPoints(l);
     }
 
     if (_forEdit) {
       _mapOptions = MapOptions(
-        bounds: bnd,
+        initialCameraFit: CameraFit.bounds(bounds: bnd),
         maxZoom: 18.0,
         minZoom: 9.0,
-        zoom: 16.0,
+        initialZoom: 16.0,
+        /*
         allowPanningOnScrollingParent: false,
         plugins: [
           DragMarkerPlugin(),
         ],
+         */
         onTap: (_, ll) {
           _polyEditor.add(_polygon.points, ll);
         },
-        //onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
+        onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
       );
     } else {
       _mapOptions = MapOptions(
-        bounds: bnd,
+        initialCameraFit: CameraFit.bounds(bounds: bnd),
         maxZoom: 18.0,
         minZoom: 10.0,
-        zoom: 16.0,
-        allowPanningOnScrollingParent: false,
-        onTap: (_, ll) {
-          //_polyEditor.add(_polygon.points, ll);
-        },
-        //onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
+        initialZoom: 16.0,
+        //allowPanningOnScrollingParent: false,
+        onPositionChanged: _forEdit ? (pos, y) => _moveMap(pos) : (pos, y) {},
       );
     }
     _polyEditor = PolyEditor(
@@ -80,8 +80,14 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
       points: _polygon.points,
       pointIcon: const Icon(Icons.crop_square, size: 30),
       intermediateIcon: const Icon(Icons.lens, size: 30, color: Colors.grey),
-      callbackRefresh: () => {setState(() {})},
+      callbackRefresh: (LatLng? _) {
+        setState(() {});
+      },
     );
+  }
+
+  _moveMap(MapCamera pos) {
+    //_presentPoint = LatLng(pos.center!.latitude, pos.center!.longitude);
   }
 
   @override
@@ -91,20 +97,20 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
 
   @override
   Widget build(BuildContext context) {
-    List<LayerOptions> layers =
+    List<Widget> layers =
         LayerControlUtils.createLayerOptionsList(_mapLayers);
 
     if (LayerControlUtils.gttBndPoly.points.isNotEmpty) {
-      layers.add(PolygonLayerOptions(polygons: [LayerControlUtils.gttBndPoly]));
+      layers.add(PolygonLayer(polygons: [LayerControlUtils.gttBndPoly]));
     }
 
-    layers.add(PolygonLayerOptions(
+    layers.add(PolygonLayer(
       polygonCulling: false,
       polygons: [_polygon],
     ));
 
     if (_forEdit) {
-      layers.add(DragMarkerPluginOptions(markers: _polyEditor.edit()));
+      layers.add(DragMarkers(markers: _polyEditor.edit()));
     }
 
     return Scaffold(
@@ -121,7 +127,7 @@ class IssueMapViewPagePolygonState extends State<IssueMapViewPagePolygon> {
                 FlutterMap(
                   options: _mapOptions,
                   mapController: _mapController,
-                  layers: layers,
+                  children: layers,
                 ),
                 Align(
                   alignment: Alignment.topRight,

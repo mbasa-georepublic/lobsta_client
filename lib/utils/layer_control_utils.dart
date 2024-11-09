@@ -183,7 +183,7 @@ class LayerControlUtils {
     List<MapLayer> _mapLayers = [];
     MapLayer mapLayer = MapLayer.xyz(
         "OSM Standard",
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "xyz",
         1.0,
         true,
@@ -215,21 +215,21 @@ class LayerControlUtils {
     return _mapLayers;
   }
 
-  static List<LayerOptions> createLayerOptionsList(List<MapLayer> mapLayers) {
-    List<LayerOptions> layerOptions = [];
+  static List<Widget> createLayerOptionsList(List<MapLayer> mapLayers) {
+    List<Widget> layerOptions = [];
     /**
      * Base Layers
      */
     for (MapLayer mapLayer in mapLayers) {
       if (mapLayer.isBaseLayer && mapLayer.isVisible) {
         if (mapLayer.layerType.toUpperCase().contains("XYZ")) {
-          layerOptions.add(TileLayerOptions(
+          layerOptions.add(TileLayer(
             urlTemplate: mapLayer.url,
             subdomains: mapLayer.xyzSubdomains,
           ));
           break;
         } else if (mapLayer.layerType.toUpperCase().contains("WMS")) {
-          layerOptions.add(TileLayerOptions(
+          layerOptions.add(TileLayer(
             wmsOptions: WMSTileLayerOptions(
               baseUrl: mapLayer.url,
               layers: mapLayer.wmsLayers,
@@ -247,19 +247,21 @@ class LayerControlUtils {
     for (MapLayer mapLayer in mapLayers) {
       if (!mapLayer.isBaseLayer && mapLayer.isVisible) {
         if (mapLayer.layerType.toUpperCase().contains("XYZ")) {
-          layerOptions.add(TileLayerOptions(
+          layerOptions.add(TileLayer(
             urlTemplate: mapLayer.url,
             subdomains: mapLayer.xyzSubdomains,
-            opacity: mapLayer.opacity,
+            tileDisplay: TileDisplay.instantaneous(opacity: mapLayer.opacity),
+            //opacity: mapLayer.opacity,
           ));
         } else if (mapLayer.layerType.toUpperCase().contains("WMS")) {
-          layerOptions.add(TileLayerOptions(
+          layerOptions.add(TileLayer(
             wmsOptions: WMSTileLayerOptions(
               baseUrl: mapLayer.url,
               layers: mapLayer.wmsLayers,
               otherParameters: mapLayer.wmsOtherParams,
             ),
-            opacity: mapLayer.opacity,
+            tileDisplay: TileDisplay.instantaneous(opacity: mapLayer.opacity),
+            //opacity: mapLayer.opacity,
           ));
         }
       }
